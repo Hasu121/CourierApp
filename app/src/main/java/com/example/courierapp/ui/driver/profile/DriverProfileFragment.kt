@@ -1,4 +1,4 @@
-package com.example.courierapp.ui.customer.profile
+package com.example.courierapp.ui.driver.profile
 
 import android.content.Intent
 import android.os.Bundle
@@ -9,16 +9,18 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.courierapp.data.firebase.FirebaseRefs
 import com.example.courierapp.data.pref.SessionManager
+import com.example.courierapp.data.repository.DriverRepository
 import com.example.courierapp.data.repository.ProfileRepository
-import com.example.courierapp.databinding.FragmentCustomerProfileBinding
+import com.example.courierapp.databinding.FragmentDriverProfileBinding
 import com.example.courierapp.ui.auth.LoginActivity
 
-class CustomerProfileFragment : Fragment() {
+class DriverProfileFragment : Fragment() {
 
-    private var _binding: FragmentCustomerProfileBinding? = null
+    private var _binding: FragmentDriverProfileBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var sessionManager: SessionManager
+    private val driverRepository = DriverRepository()
     private val profileRepository = ProfileRepository()
 
     override fun onCreateView(
@@ -26,7 +28,7 @@ class CustomerProfileFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentCustomerProfileBinding.inflate(inflater, container, false)
+        _binding = FragmentDriverProfileBinding.inflate(inflater, container, false)
         sessionManager = SessionManager(requireContext())
         return binding.root
     }
@@ -34,10 +36,10 @@ class CustomerProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        loadProfile()
+        loadDriverProfile()
 
         binding.btnSaveProfile.setOnClickListener {
-            saveProfile()
+            saveDriverProfile()
         }
 
         binding.btnLogout.setOnClickListener {
@@ -48,40 +50,50 @@ class CustomerProfileFragment : Fragment() {
         }
     }
 
-    private fun loadProfile() {
-        val currentUser = FirebaseRefs.auth.currentUser
-        if (currentUser != null) {
-            FirebaseRefs.db.collection(FirebaseRefs.USERS)
-                .document(currentUser.uid)
-                .get()
-                .addOnSuccessListener { document ->
-                    binding.etFullName.setText(document.getString("fullName").orEmpty())
-                    binding.etEmail.setText(document.getString("email").orEmpty())
-                    binding.etPhone.setText(document.getString("phone").orEmpty())
-                    binding.etAddress.setText(document.getString("address").orEmpty())
-                }
-                .addOnFailureListener {
-                    Toast.makeText(requireContext(), "Failed to load profile", Toast.LENGTH_SHORT).show()
-                }
-        }
+    private fun loadDriverProfile() {
+        driverRepository.getCurrentDriverUser(
+            onSuccess = { user ->
+                binding.etFullName.setText(user.fullName)
+                binding.etEmail.setText(user.email)
+                binding.etPhone.setText(user.phone)
+                binding.etAddress.setText(user.address)
+            },
+            onFailure = { message ->
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            }
+        )
+
+        driverRepository.getCurrentDriverProfile(
+            onSuccess = { profile ->
+                binding.etVehicleType.setText(profile.vehicleType)
+                binding.etVehicleNumber.setText(profile.vehicleNumber)
+            },
+            onFailure = { message ->
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            }
+        )
     }
 
-    private fun saveProfile() {
+    private fun saveDriverProfile() {
         val fullName = binding.etFullName.text.toString().trim()
         val phone = binding.etPhone.text.toString().trim()
         val address = binding.etAddress.text.toString().trim()
+        val vehicleType = binding.etVehicleType.text.toString().trim()
+        val vehicleNumber = binding.etVehicleNumber.text.toString().trim()
 
-        if (fullName.isEmpty() || phone.isEmpty() || address.isEmpty()) {
+        if (fullName.isEmpty() || phone.isEmpty() || address.isEmpty() || vehicleType.isEmpty() || vehicleNumber.isEmpty()) {
             Toast.makeText(requireContext(), "Please fill all fields", Toast.LENGTH_SHORT).show()
             return
         }
 
-        profileRepository.updateCustomerProfile(
+        profileRepository.updateDriverProfile(
             fullName = fullName,
             phone = phone,
             address = address,
+            vehicleType = vehicleType,
+            vehicleNumber = vehicleNumber,
             onSuccess = {
-                Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Driver profile updated", Toast.LENGTH_SHORT).show()
             },
             onFailure = { message ->
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()

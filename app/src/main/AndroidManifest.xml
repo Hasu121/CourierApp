@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
         android:allowBackup="true"
@@ -11,15 +10,24 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CourierApp">
+
+        <activity android:name=".ui.driver.DriverMainActivity" />
+        <activity android:name=".ui.customer.CustomerMainActivity" />
+        <activity android:name=".ui.auth.DriverRegisterStep2Activity" />
+        <activity android:name=".ui.auth.DriverRegisterStep1Activity" />
+        <activity android:name=".ui.auth.CustomerRegisterActivity" />
+        <activity android:name=".ui.auth.RegisterChoiceActivity" />
+        <activity android:name=".ui.auth.LoginActivity" />
+
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.auth.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

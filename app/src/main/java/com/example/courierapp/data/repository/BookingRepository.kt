@@ -10,16 +10,22 @@ class BookingRepository {
     fun createBooking(
         bookingType: String,
         pickupAddress: String,
+        pickupLat: Double,
+        pickupLng: Double,
         dropAddress: String,
+        dropLat: Double,
+        dropLng: Double,
         packageType: String,
         packageWeight: String,
         packageNote: String,
         receiverName: String,
         receiverPhone: String,
         preferredTime: String,
+        distanceKm: Double,
+        estimatedFare: Double,
         onSuccess: () -> Unit,
         onFailure: (String) -> Unit
-    ) {
+    ){
         val currentUser = FirebaseRefs.auth.currentUser
         if (currentUser == null) {
             onFailure("User not logged in")
@@ -35,18 +41,19 @@ class BookingRepository {
             assignedDriverId = "",
             bookingType = bookingType,
             pickupAddress = pickupAddress,
-            pickupLat = 0.0,
-            pickupLng = 0.0,
+            pickupLat = pickupLat,
+            pickupLng = pickupLng,
             dropAddress = dropAddress,
-            dropLat = 0.0,
-            dropLng = 0.0,
+            dropLat = dropLat,
+            dropLng = dropLng,
+            distanceKm = distanceKm,
+            estimatedFare = estimatedFare,
             packageType = packageType,
             packageWeight = packageWeight,
             packageNote = packageNote,
             receiverName = receiverName,
             receiverPhone = receiverPhone,
             preferredTime = preferredTime,
-            estimatedFare = 0.0,
             finalFare = 0.0,
             paymentMethod = "cash",
             paymentStatus = "pending",
@@ -69,9 +76,7 @@ class BookingRepository {
             .addOnSuccessListener {
                 FirebaseRefs.db.collection(FirebaseRefs.BOOKING_STATUS_LOGS)
                     .add(bookingLog)
-                    .addOnSuccessListener {
-                        onSuccess()
-                    }
+                    .addOnSuccessListener { onSuccess() }
                     .addOnFailureListener { e ->
                         onFailure(e.message ?: "Booking saved but status log failed")
                     }

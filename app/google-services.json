@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "70804599825",
+    "project_id": "courierapp-bc306",
+    "storage_bucket": "courierapp-bc306.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:70804599825:android:21f8e668e9f413581aadb0",
+        "android_client_info": {
+          "package_name": "com.example.courierapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsoc6eLNZ-pV4Wed-v9LC_TUiRpj5pTMw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

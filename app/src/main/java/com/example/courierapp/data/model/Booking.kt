@@ -1,0 +1,27 @@
+package com.example.courierapp.data.model
+
+data class Booking(
+    val bookingId: String = "",
+    val customerId: String = "",
+    val assignedDriverId: String = "",
+    val bookingType: String = "",
+    val pickupAddress: String = "",
+    val pickupLat: Double = 0.0,
+    val pickupLng: Double = 0.0,
+    val dropAddress: String = "",
+    val dropLat: Double = 0.0,
+    val dropLng: Double = 0.0,
+    val packageType: String = "",
+    val packageWeight: String = "",
+    val packageNote: String = "",
+    val receiverName: String = "",
+    val receiverPhone: String = "",
+    val preferredTime: String = "",
+    val estimatedFare: Double = 0.0,
+    val finalFare: Double = 0.0,
+    val paymentMethod: String = "cash",
+    val paymentStatus: String = "pending",
+    val status: String = "pending",
+    val createdAt: Long = 0L,
+    val updatedAt: Long = 0L
+)

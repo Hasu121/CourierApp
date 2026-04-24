@@ -11,6 +11,7 @@ data class Booking(
     val dropAddress: String = "",
     val dropLat: Double = 0.0,
     val dropLng: Double = 0.0,
+    val distanceKm: Double = 0.0,
     val packageType: String = "",
     val packageWeight: String = "",
     val packageNote: String = "",

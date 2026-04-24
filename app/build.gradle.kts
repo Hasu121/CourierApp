@@ -1,9 +1,15 @@
+import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.gms)
     alias(libs.plugins.ksp)
 }
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
 
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
 android {
     namespace = "com.example.courierapp"
     compileSdk = 36
@@ -15,6 +21,8 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        val stadiaApiKey = localProperties.getProperty("STADIA_API_KEY", "")
+        buildConfigField("String", "STADIA_API_KEY", "\"$stadiaApiKey\"")
     }
 
     buildFeatures {

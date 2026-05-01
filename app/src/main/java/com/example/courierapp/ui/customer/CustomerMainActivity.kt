@@ -8,6 +8,8 @@ import com.example.courierapp.databinding.ActivityCustomerMainBinding
 import com.example.courierapp.ui.customer.booking.CreateBookingFragment
 import com.example.courierapp.ui.customer.home.CustomerHomeFragment
 import com.example.courierapp.ui.customer.profile.CustomerProfileFragment
+import com.example.courierapp.ui.customer.history.CustomerBookingHistoryFragment
+
 
 class CustomerMainActivity : AppCompatActivity() {
 
@@ -30,6 +32,10 @@ class CustomerMainActivity : AppCompatActivity() {
                 }
                 R.id.menu_customer_booking -> {
                     loadFragment(CreateBookingFragment())
+                    true
+                }
+                R.id.menu_customer_history -> {
+                    loadFragment(CustomerBookingHistoryFragment())
                     true
                 }
                 R.id.menu_customer_profile -> {

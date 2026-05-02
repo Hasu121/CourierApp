@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/courier_light_bg"
     android:orientation="vertical"
     android:padding="20dp">
 
@@ -9,6 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Available Jobs"
+        android:textColor="@color/courier_dark"
         android:textSize="24sp"
         android:textStyle="bold" />
 
@@ -17,7 +19,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Matching jobs will appear here." />
+        android:text="Matching jobs will appear here."
+        android:textColor="@color/courier_dark" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvAvailableJobs"

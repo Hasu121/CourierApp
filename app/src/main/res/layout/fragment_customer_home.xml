@@ -40,7 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="You have 0 recent bookings"
-                android:textColor="@android:color/white"
+                android:textColor="@color/courier_white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -50,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:text="Create a booking and track it from history."
-                android:textColor="@android:color/white" />
+                android:textColor="@color/courier_white" />
         </LinearLayout>
 
         <TextView
@@ -68,6 +68,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="No recent bookings yet."
+            android:textColor="@color/courier_dark"
             android:visibility="gone" />
 
         <androidx.recyclerview.widget.RecyclerView

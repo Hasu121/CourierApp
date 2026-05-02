@@ -39,24 +39,52 @@ class DriverHomeFragment : Fragment() {
     private fun loadDriverData() {
         driverRepository.getCurrentDriverUser(
             onSuccess = { user ->
-                binding.tvWelcomeDriver.text = "Welcome, ${user.fullName}"
+                val safeBinding = _binding ?: return@getCurrentDriverUser
+                safeBinding.tvWelcomeDriver.text = "Welcome, ${user.fullName}"
             },
             onFailure = { message ->
+                if (!isAdded) return@getCurrentDriverUser
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
             }
         )
 
         driverRepository.getCurrentDriverProfile(
             onSuccess = { profile ->
-                binding.tvVehicleType.text = "Vehicle Type: ${profile.vehicleType}"
-                binding.tvVehicleNumber.text = "Vehicle Number: ${profile.vehicleNumber}"
-                binding.tvLicenseNumber.text = "License Number: ${profile.licenseNumber}"
-                binding.tvVerificationStatus.text = "Verification Status: ${profile.verificationStatus}"
-                binding.tvServiceMode.text = "Service Mode: ${profile.serviceMode.joinToString()}"
-                binding.tvAvailability.text = "Availability: ${if (profile.isAvailable) "Online" else "Offline"}"
-                binding.switchAvailability.isChecked = profile.isAvailable
+                val safeBinding = _binding ?: return@getCurrentDriverProfile
+
+                safeBinding.tvVehicleType.text = "Vehicle Type: ${profile.vehicleType}"
+                safeBinding.tvVehicleNumber.text = "Vehicle Number: ${profile.vehicleNumber}"
+                safeBinding.tvLicenseNumber.text = "License Number: ${profile.licenseNumber}"
+                safeBinding.tvVerificationStatus.text = "Verification Status: ${profile.verificationStatus}"
+                safeBinding.tvServiceMode.text = "Service Mode: ${profile.serviceMode.joinToString()}"
+                safeBinding.tvAvailability.text =
+                    "Availability: ${if (profile.isAvailable) "Online" else "Offline"}"
+
+                safeBinding.switchAvailability.setOnCheckedChangeListener(null)
+                safeBinding.switchAvailability.isChecked = profile.isAvailable
+
+                safeBinding.switchAvailability.setOnCheckedChangeListener { _, isChecked ->
+                    driverRepository.updateAvailability(
+                        isAvailable = isChecked,
+                        onSuccess = {
+                            val currentBinding = _binding ?: return@updateAvailability
+                            currentBinding.tvAvailability.text =
+                                "Availability: ${if (isChecked) "Online" else "Offline"}"
+
+                            if (isAdded) {
+                                Toast.makeText(requireContext(), "Availability updated", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        onFailure = { message ->
+                            if (isAdded) {
+                                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    )
+                }
             },
             onFailure = { message ->
+                if (!isAdded) return@getCurrentDriverProfile
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
             }
         )
@@ -94,16 +122,24 @@ class DriverHomeFragment : Fragment() {
                     lat = lat,
                     lng = lng,
                     onSuccess = {
-                        binding.tvCurrentLocation.text = "Current Location: $lat, $lng"
-                        Toast.makeText(requireContext(), "Location updated", Toast.LENGTH_SHORT).show()
+                        val safeBinding = _binding ?: return@updateDriverLocation
+                        safeBinding.tvCurrentLocation.text = "Current Location: $lat, $lng"
+
+                        if (isAdded) {
+                            Toast.makeText(requireContext(), "Location updated", Toast.LENGTH_SHORT).show()
+                        }
                     },
                     onFailure = { message ->
-                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                        if (isAdded) {
+                            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                        }
                     }
                 )
             },
             onFailure = { message ->
-                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                if (isAdded) {
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                }
             }
         )
     }

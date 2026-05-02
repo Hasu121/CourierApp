@@ -25,6 +25,7 @@
         <activity android:name=".ui.auth.RegisterChoiceActivity" />
         <activity android:name=".ui.auth.LoginActivity" />
         <activity android:name=".ui.customer.history.BookingDetailsActivity" />
+        <activity android:name=".ui.admin.AdminMainActivity" />
 
         <activity
             android:name=".ui.auth.SplashActivity"

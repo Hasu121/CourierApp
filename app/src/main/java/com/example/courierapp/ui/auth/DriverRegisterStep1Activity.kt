@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.courierapp.R
 import com.example.courierapp.databinding.ActivityDriverRegisterStep1Binding
 import kotlin.jvm.java
 
@@ -15,6 +16,9 @@ class DriverRegisterStep1Activity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityDriverRegisterStep1Binding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        window.statusBarColor = getColor(R.color.courier_green)
+        window.navigationBarColor = getColor(R.color.courier_light_bg)
 
         binding.btnNext.setOnClickListener {
             val fullName = binding.etFullName.text.toString().trim()

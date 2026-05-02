@@ -10,6 +10,9 @@ import com.example.courierapp.databinding.ActivityLoginBinding
 import com.example.courierapp.ui.customer.CustomerMainActivity
 import com.example.courierapp.ui.driver.DriverMainActivity
 import com.example.courierapp.utils.Constants
+import com.example.courierapp.ui.admin.AdminMainActivity
+import android.app.AlertDialog
+import com.example.courierapp.R
 
 class LoginActivity : AppCompatActivity() {
 
@@ -21,6 +24,9 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        window.statusBarColor = getColor(R.color.courier_green)
+        window.navigationBarColor = getColor(R.color.courier_light_bg)
 
         sessionManager = SessionManager(this)
 
@@ -45,10 +51,17 @@ class LoginActivity : AppCompatActivity() {
                             startActivity(Intent(this, CustomerMainActivity::class.java))
                             finish()
                         }
+
                         Constants.ROLE_DRIVER -> {
                             startActivity(Intent(this, DriverMainActivity::class.java))
                             finish()
                         }
+
+                        Constants.ROLE_ADMIN -> {
+                            startActivity(Intent(this, AdminMainActivity::class.java))
+                            finish()
+                        }
+
                         else -> {
                             Toast.makeText(this, "Invalid role", Toast.LENGTH_SHORT).show()
                         }
@@ -60,8 +73,46 @@ class LoginActivity : AppCompatActivity() {
             )
         }
 
+        binding.tvForgotPassword.setOnClickListener {
+            showForgotPasswordDialog()
+        }
+
         binding.tvGoToRegister.setOnClickListener {
             startActivity(Intent(this, RegisterChoiceActivity::class.java))
         }
+    }
+
+    private fun showForgotPasswordDialog() {
+        val emailInput = android.widget.EditText(this)
+        emailInput.hint = "Enter your email"
+        emailInput.inputType = android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+
+        AlertDialog.Builder(this)
+            .setTitle("Reset Password")
+            .setMessage("Enter your account email. We will send a password reset link.")
+            .setView(emailInput)
+            .setPositiveButton("Send") { dialog, _ ->
+                val email = emailInput.text.toString().trim()
+
+                if (email.isEmpty()) {
+                    Toast.makeText(this, "Please enter email", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                authRepository.sendPasswordResetEmail(
+                    email = email,
+                    onSuccess = {
+                        Toast.makeText(this, "Password reset email sent", Toast.LENGTH_LONG).show()
+                        dialog.dismiss()
+                    },
+                    onFailure = { message ->
+                        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 }

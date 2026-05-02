@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="10dp"
-    android:background="#EEEEEE"
+    android:background="@color/courier_card"
     android:orientation="vertical"
     android:padding="12dp">
 
@@ -12,6 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Status"
+        android:textColor="@color/courier_green"
         android:textStyle="bold" />
 
     <TextView
@@ -19,12 +20,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:text="Note" />
+        android:text="Note"
+        android:textColor="@color/courier_dark" />
 
     <TextView
         android:id="@+id/tvTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:text="Time" />
+        android:text="Time"
+        android:textColor="@color/courier_gray_text" />
+
 </LinearLayout>

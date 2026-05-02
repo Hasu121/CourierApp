@@ -21,9 +21,4 @@
         android:icon="@android:drawable/ic_dialog_info"
         android:title="Alerts" />
 
-    <item
-        android:id="@+id/menu_customer_profile"
-        android:icon="@android:drawable/ic_menu_manage"
-        android:title="Profile" />
-
 </menu>

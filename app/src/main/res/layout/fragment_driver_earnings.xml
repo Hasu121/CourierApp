@@ -31,6 +31,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Total Earnings: ৳0"
+                android:textColor="@color/courier_dark"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -39,15 +40,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Today's Earnings: ৳0" />
+                android:text="Today's Earnings: ৳0"
+                android:textColor="@color/courier_dark" />
 
             <TextView
                 android:id="@+id/tvCompletedCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Completed Deliveries: 0" />
-
+                android:text="Completed Deliveries: 0"
+                android:textColor="@color/courier_dark" />
         </LinearLayout>
 
         <TextView
@@ -55,7 +57,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
-            android:text="Recent earnings" />
+            android:text="Recent earnings"
+            android:textColor="@color/courier_dark"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvEarnings"

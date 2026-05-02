@@ -3,50 +3,57 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    android:background="#EEEEEE"
+    android:background="@color/courier_card"
     android:orientation="vertical"
-    android:padding="12dp">
+    android:padding="14dp">
 
     <TextView
         android:id="@+id/tvStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Status"
+        android:textColor="@color/courier_green"
+        android:textSize="16sp"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tvBookingType"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="Booking Type" />
+        android:layout_marginTop="7dp"
+        android:text="Booking Type"
+        android:textColor="@color/courier_dark" />
 
     <TextView
         android:id="@+id/tvPickup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="Pickup" />
+        android:layout_marginTop="7dp"
+        android:text="Pickup"
+        android:textColor="@color/courier_dark" />
 
     <TextView
         android:id="@+id/tvDrop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="Drop" />
+        android:layout_marginTop="7dp"
+        android:text="Drop"
+        android:textColor="@color/courier_dark" />
 
     <TextView
         android:id="@+id/tvFareDistance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="Fare / Distance" />
+        android:layout_marginTop="7dp"
+        android:text="Fare / Distance"
+        android:textColor="@color/courier_dark" />
 
     <TextView
         android:id="@+id/tvCreatedAt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="Created At" />
+        android:layout_marginTop="7dp"
+        android:text="Created At"
+        android:textColor="@color/courier_gray_text" />
 
 </LinearLayout>

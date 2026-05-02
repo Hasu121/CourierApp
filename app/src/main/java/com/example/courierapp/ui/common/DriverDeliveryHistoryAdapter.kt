@@ -1,7 +1,9 @@
 package com.example.courierapp.ui.common
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.courierapp.data.model.Booking
 import com.example.courierapp.databinding.ItemDriverDeliveryHistoryBinding
@@ -13,6 +15,8 @@ import java.util.Locale
 class DriverDeliveryHistoryAdapter(
     private var items: List<Booking>,
     private var customerNames: Map<String, String>,
+    private var reviewedBookingIds: Set<String>,
+    private val onSubmitReview: (Booking, Int, String) -> Unit,
     private val onItemClick: (Booking) -> Unit
 ) : RecyclerView.Adapter<DriverDeliveryHistoryAdapter.HistoryViewHolder>() {
 
@@ -41,6 +45,29 @@ class DriverDeliveryHistoryAdapter(
 
             binding.tvDeliveredAt.text = "Delivered At: $dateText"
 
+            binding.btnSubmitDriverReview.setOnClickListener {
+                val rating = binding.etDriverRating.text.toString().trim().toIntOrNull()
+                val comment = binding.etDriverReviewComment.text.toString().trim()
+
+                if (rating == null || rating < 1 || rating > 5) {
+                    Toast.makeText(binding.root.context, "Rating must be 1 to 5", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                if (comment.isEmpty()) {
+                    Toast.makeText(binding.root.context, "Please enter a comment", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                onSubmitReview(item, rating, comment)
+            }
+
+            val alreadyReviewed = reviewedBookingIds.contains(item.bookingId)
+
+            binding.etDriverRating.visibility = if (alreadyReviewed) View.GONE else View.VISIBLE
+            binding.etDriverReviewComment.visibility = if (alreadyReviewed) View.GONE else View.VISIBLE
+            binding.btnSubmitDriverReview.visibility = if (alreadyReviewed) View.GONE else View.VISIBLE
+
             binding.root.setOnClickListener {
                 onItemClick(item)
             }
@@ -62,9 +89,14 @@ class DriverDeliveryHistoryAdapter(
 
     override fun getItemCount(): Int = items.size
 
-    fun updateData(newItems: List<Booking>, newCustomerNames: Map<String, String>) {
+    fun updateData(
+        newItems: List<Booking>,
+        newCustomerNames: Map<String, String>,
+        newReviewedBookingIds: Set<String>
+    ) {
         items = newItems
         customerNames = newCustomerNames
+        reviewedBookingIds = newReviewedBookingIds
         notifyDataSetChanged()
     }
 }

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.courierapp.R
 import com.example.courierapp.data.repository.AuthRepository
 import com.example.courierapp.databinding.ActivityDriverRegisterStep2Binding
 
@@ -16,6 +17,9 @@ class DriverRegisterStep2Activity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityDriverRegisterStep2Binding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        window.statusBarColor = getColor(R.color.courier_green)
+        window.navigationBarColor = getColor(R.color.courier_light_bg)
 
         val fullName = intent.getStringExtra("fullName").orEmpty()
         val email = intent.getStringExtra("email").orEmpty()

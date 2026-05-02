@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="@color/courier_card"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <TextView
+        android:id="@+id/tvDriverName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Driver Name"
+        android:textColor="@color/courier_dark"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvDriverEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:text="Email"
+        android:textColor="@color/courier_dark" />
+
+    <TextView
+        android:id="@+id/tvVehicleInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:text="Vehicle"
+        android:textColor="@color/courier_dark" />
+
+    <TextView
+        android:id="@+id/tvLicenseInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:text="License"
+        android:textColor="@color/courier_dark" />
+
+    <TextView
+        android:id="@+id/tvServiceMode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:text="Service Mode"
+        android:textColor="@color/courier_dark" />
+
+    <TextView
+        android:id="@+id/tvVerificationStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:text="Status"
+        android:textColor="@color/courier_green"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:id="@+id/layoutApprovalButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnPendingDriver"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="@color/courier_gray_text"
+            android:text="Pending"
+            android:textColor="@color/courier_white" />
+
+        <Button
+            android:id="@+id/btnApproveDriver"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/courier_green"
+            android:text="Approve"
+            android:textColor="@color/courier_white" />
+
+        <Button
+            android:id="@+id/btnRejectDriver"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/courier_error"
+            android:text="Reject"
+            android:textColor="@color/courier_white" />
+
+    </LinearLayout>
+
+</LinearLayout>

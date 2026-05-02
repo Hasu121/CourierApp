@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    android:background="#EEEEEE"
+    android:background="@color/courier_card"
     android:orientation="vertical"
     android:padding="12dp">
 
@@ -12,6 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Amount"
+        android:textColor="@color/courier_dark"
         android:textStyle="bold" />
 
     <TextView
@@ -19,27 +20,31 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:text="Customer" />
+        android:text="Customer"
+        android:textColor="@color/courier_dark" />
 
     <TextView
         android:id="@+id/tvDropAddress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:text="Drop Address" />
+        android:text="Drop Address"
+        android:textColor="@color/courier_dark" />
 
     <TextView
         android:id="@+id/tvPayment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:text="Payment" />
+        android:text="Payment"
+        android:textColor="@color/courier_dark" />
 
     <TextView
         android:id="@+id/tvDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:text="Date" />
+        android:text="Date"
+        android:textColor="@color/courier_dark" />
 
 </LinearLayout>

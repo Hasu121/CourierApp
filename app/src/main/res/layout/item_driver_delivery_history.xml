@@ -12,6 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Status"
+        android:textColor="@color/courier_dark"
         android:textStyle="bold" />
 
     <TextView
@@ -19,34 +20,67 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:text="Customer" />
+        android:text="Customer"
+        android:textColor="@color/courier_dark" />
 
     <TextView
         android:id="@+id/tvPickup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:text="Pickup" />
+        android:text="Pickup"
+        android:textColor="@color/courier_dark" />
 
     <TextView
         android:id="@+id/tvDrop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:text="Drop" />
+        android:text="Drop"
+        android:textColor="@color/courier_dark" />
 
     <TextView
         android:id="@+id/tvFareDistance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:text="Fare / Distance" />
+        android:text="Fare / Distance"
+        android:textColor="@color/courier_dark" />
 
     <TextView
         android:id="@+id/tvDeliveredAt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:text="Delivered At" />
+        android:text="Delivered At"
+        android:textColor="@color/courier_dark" />
+
+    <EditText
+        android:id="@+id/etDriverRating"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="Rating customer 1-5"
+        android:inputType="number"
+        android:textColor="@color/courier_dark"
+        android:textColorHint="@color/courier_gray_text" />
+
+    <EditText
+        android:id="@+id/etDriverReviewComment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Comment for customer"
+        android:textColor="@color/courier_dark"
+        android:textColorHint="@color/courier_gray_text" />
+
+    <Button
+        android:id="@+id/btnSubmitDriverReview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/courier_green"
+        android:text="Submit Customer Review"
+        android:textColor="@color/courier_white" />
 
 </LinearLayout>

@@ -11,12 +11,13 @@ import com.example.courierapp.data.model.Booking
 import com.example.courierapp.data.repository.DriverRepository
 import com.example.courierapp.databinding.FragmentDriverDeliveryHistoryBinding
 import com.example.courierapp.ui.common.DriverDeliveryHistoryAdapter
+import com.example.courierapp.data.repository.ReviewRepository
 
 class DriverDeliveryHistoryFragment : Fragment() {
 
     private var _binding: FragmentDriverDeliveryHistoryBinding? = null
     private val binding get() = _binding!!
-
+    private val reviewRepository = ReviewRepository()
     private val driverRepository = DriverRepository()
     private lateinit var adapter: DriverDeliveryHistoryAdapter
 
@@ -34,10 +35,15 @@ class DriverDeliveryHistoryFragment : Fragment() {
 
         adapter = DriverDeliveryHistoryAdapter(
             items = emptyList(),
-            customerNames = emptyMap()
-        ) {
-            Toast.makeText(requireContext(), "Details screen can be added later", Toast.LENGTH_SHORT).show()
-        }
+            customerNames = emptyMap(),
+            reviewedBookingIds = emptySet(),
+            onSubmitReview = { booking, rating, comment ->
+                submitDriverReview(booking, rating, comment)
+            },
+            onItemClick = {
+                Toast.makeText(requireContext(), "Details screen can be added later", Toast.LENGTH_SHORT).show()
+            }
+        )
 
         binding.rvDeliveryHistory.layoutManager = LinearLayoutManager(requireContext())
         binding.rvDeliveryHistory.adapter = adapter
@@ -62,17 +68,63 @@ class DriverDeliveryHistoryFragment : Fragment() {
         )
     }
 
+    private fun submitDriverReview(booking: Booking, rating: Int, comment: String) {
+        reviewRepository.submitDriverReviewForCustomer(
+            booking = booking,
+            rating = rating,
+            comment = comment,
+            onSuccess = {
+                Toast.makeText(requireContext(), "Customer review submitted", Toast.LENGTH_SHORT).show()
+                loadHistory()
+            },
+            onFailure = { message ->
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
     private fun loadCustomerNames(deliveries: List<Booking>) {
         driverRepository.getCustomerNamesForBookings(
             bookings = deliveries,
             onSuccess = { customerNames ->
-                adapter.updateData(deliveries, customerNames)
+                loadDriverReviewedBookings(deliveries, customerNames)
             },
             onFailure = { message ->
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-                adapter.updateData(deliveries, emptyMap())
+                loadDriverReviewedBookings(deliveries, emptyMap())
             }
         )
+    }
+
+    private fun loadDriverReviewedBookings(
+        deliveries: List<Booking>,
+        customerNames: Map<String, String>
+    ) {
+        val reviewedIds = mutableSetOf<String>()
+
+        if (deliveries.isEmpty()) {
+            adapter.updateData(emptyList(), customerNames, emptySet())
+            return
+        }
+
+        var completed = 0
+
+        deliveries.forEach { booking ->
+            reviewRepository.checkDriverReviewed(
+                bookingId = booking.bookingId,
+                onResult = { reviewed ->
+                    if (reviewed) {
+                        reviewedIds.add(booking.bookingId)
+                    }
+
+                    completed++
+
+                    if (completed == deliveries.size) {
+                        adapter.updateData(deliveries, customerNames, reviewedIds)
+                    }
+                }
+            )
+        }
     }
 
     override fun onDestroyView() {

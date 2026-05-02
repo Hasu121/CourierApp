@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.courierapp.BuildConfig
+import com.example.courierapp.R
 import com.example.courierapp.data.model.Booking
 import com.example.courierapp.data.repository.CustomerRepository
 import com.example.courierapp.databinding.ActivityBookingDetailsBinding
@@ -12,6 +13,7 @@ import com.example.courierapp.ui.common.BookingStatusLogAdapter
 import com.example.courierapp.utils.Constants
 import org.maplibre.android.MapLibre
 import com.example.courierapp.ui.common.TrackingMapDialogFragment
+import com.example.courierapp.data.repository.ReviewRepository
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.camera.CameraPosition
@@ -29,6 +31,8 @@ class BookingDetailsActivity : AppCompatActivity() {
     private val customerRepository = CustomerRepository()
     private lateinit var logAdapter: BookingStatusLogAdapter
 
+    private val reviewRepository = ReviewRepository()
+
     private var currentBooking: Booking? = null
 
     private var pickupMarker: Marker? = null
@@ -45,6 +49,9 @@ class BookingDetailsActivity : AppCompatActivity() {
         binding = ActivityBookingDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        window.statusBarColor = getColor(R.color.courier_green)
+        window.navigationBarColor = getColor(R.color.courier_light_bg)
+
         binding.mapViewTracking.onCreate(savedInstanceState)
 
         val bookingId = intent.getStringExtra("bookingId").orEmpty()
@@ -52,6 +59,10 @@ class BookingDetailsActivity : AppCompatActivity() {
             Toast.makeText(this, "Invalid booking", Toast.LENGTH_SHORT).show()
             finish()
             return
+        }
+
+        binding.btnSubmitCustomerReview.setOnClickListener {
+            submitCustomerReview()
         }
 
         binding.btnExpandTrackingMap.setOnClickListener {
@@ -163,6 +174,8 @@ class BookingDetailsActivity : AppCompatActivity() {
 
                 binding.tvCreatedAt.text = "Created At: $formattedDate"
 
+                showCustomerReviewSectionIfAllowed(booking)
+
                 setupTrackingMap(booking)
             },
             onFailure = { message ->
@@ -179,6 +192,71 @@ class BookingDetailsActivity : AppCompatActivity() {
             },
             onFailure = { message ->
                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
+    private fun submitCustomerReview() {
+        val booking = currentBooking
+        if (booking == null) {
+            Toast.makeText(this, "Booking not loaded yet", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val ratingText = binding.etCustomerRating.text.toString().trim()
+        val comment = binding.etCustomerReviewComment.text.toString().trim()
+
+        val rating = ratingText.toIntOrNull()
+        if (rating == null || rating < 1 || rating > 5) {
+            Toast.makeText(this, "Enter rating from 1 to 5", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (comment.isEmpty()) {
+            Toast.makeText(this, "Please enter a comment", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        reviewRepository.submitCustomerReviewForDriver(
+            booking = booking,
+            rating = rating,
+            comment = comment,
+            onSuccess = {
+                Toast.makeText(this, "Review submitted", Toast.LENGTH_SHORT).show()
+                binding.etCustomerRating.text?.clear()
+                binding.etCustomerReviewComment.text?.clear()
+                hideCustomerReviewSection()
+            },
+            onFailure = { message ->
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
+    private fun hideCustomerReviewSection() {
+        binding.tvCustomerReviewTitle.visibility = android.view.View.GONE
+        binding.etCustomerRating.visibility = android.view.View.GONE
+        binding.etCustomerReviewComment.visibility = android.view.View.GONE
+        binding.btnSubmitCustomerReview.visibility = android.view.View.GONE
+    }
+
+    private fun showCustomerReviewSectionIfAllowed(booking: Booking) {
+        if (booking.status != Constants.STATUS_DELIVERED) {
+            hideCustomerReviewSection()
+            return
+        }
+
+        reviewRepository.checkCustomerReviewed(
+            bookingId = booking.bookingId,
+            onResult = { alreadyReviewed ->
+                if (alreadyReviewed) {
+                    hideCustomerReviewSection()
+                } else {
+                    binding.tvCustomerReviewTitle.visibility = android.view.View.VISIBLE
+                    binding.etCustomerRating.visibility = android.view.View.VISIBLE
+                    binding.etCustomerReviewComment.visibility = android.view.View.VISIBLE
+                    binding.btnSubmitCustomerReview.visibility = android.view.View.VISIBLE
+                }
             }
         )
     }

@@ -9,6 +9,7 @@ import com.example.courierapp.databinding.ActivitySplashBinding
 import com.example.courierapp.ui.customer.CustomerMainActivity
 import com.example.courierapp.ui.driver.DriverMainActivity
 import com.example.courierapp.utils.Constants
+import com.example.courierapp.ui.admin.AdminMainActivity
 
 class SplashActivity : AppCompatActivity() {
 
@@ -46,9 +47,15 @@ class SplashActivity : AppCompatActivity() {
                         Constants.ROLE_CUSTOMER -> {
                             startActivity(Intent(this, CustomerMainActivity::class.java))
                         }
+
                         Constants.ROLE_DRIVER -> {
                             startActivity(Intent(this, DriverMainActivity::class.java))
                         }
+
+                        Constants.ROLE_ADMIN -> {
+                            startActivity(Intent(this, AdminMainActivity::class.java))
+                        }
+
                         else -> {
                             startActivity(Intent(this, LoginActivity::class.java))
                         }

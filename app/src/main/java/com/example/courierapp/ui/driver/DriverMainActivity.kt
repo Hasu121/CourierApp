@@ -3,20 +3,22 @@ package com.example.courierapp.ui.driver
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
+import androidx.core.view.WindowInsetsCompat
 import com.example.courierapp.R
 import com.example.courierapp.data.firebase.FirebaseRefs
 import com.example.courierapp.data.pref.SessionManager
 import com.example.courierapp.databinding.ActivityDriverMainBinding
 import com.example.courierapp.ui.auth.LoginActivity
+import com.example.courierapp.ui.driver.earnings.DriverEarningsFragment
+import com.example.courierapp.ui.driver.history.DriverDeliveryHistoryFragment
 import com.example.courierapp.ui.driver.home.DriverHomeFragment
 import com.example.courierapp.ui.driver.jobs.AvailableJobsFragment
 import com.example.courierapp.ui.driver.jobs.MyDeliveriesFragment
 import com.example.courierapp.ui.driver.profile.DriverProfileFragment
-import com.example.courierapp.utils.InsetHelper
-import com.example.courierapp.ui.driver.earnings.DriverEarningsFragment
-import com.example.courierapp.ui.driver.history.DriverDeliveryHistoryFragment
 
 class DriverMainActivity : AppCompatActivity() {
 
@@ -28,97 +30,104 @@ class DriverMainActivity : AppCompatActivity() {
         binding = ActivityDriverMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        InsetHelper.applySystemBarPadding(
-            view = binding.driverTopBar,
-            applyTop = true,
-            applyBottom = false
-        )
-
-        InsetHelper.applySystemBarPadding(
-            view = binding.bottomNavigationDriver,
-            applyTop = false,
-            applyBottom = true
-        )
-
-        InsetHelper.applySystemBarPadding(
-            view = binding.driverDrawerContent,
-            applyTop = true,
-            applyBottom = true
-        )
-
         sessionManager = SessionManager(this)
 
-        loadDrawerProfile()
+        window.statusBarColor = ContextCompat.getColor(this, R.color.courier_green)
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.courier_light_bg)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.driverTopBar) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            view.setPadding(
+                view.paddingLeft,
+                systemBars.top,
+                view.paddingRight,
+                view.paddingBottom
+            )
+
+            insets
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.driverDrawerContent) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            view.setPadding(
+                view.paddingLeft,
+                systemBars.top + 20,
+                view.paddingRight,
+                systemBars.bottom + 20
+            )
+
+            insets
+        }
+
+        setupTopBar()
+        setupBottomNavigation()
+        setupDrawerButtons()
 
         if (savedInstanceState == null) {
-            loadFragment(DriverHomeFragment())
-            binding.tvDriverTopTitle.text = "Driver Home"
+            loadFragment(DriverHomeFragment(), "Driver Home")
+            binding.bottomNavigationDriver.selectedItemId = R.id.menu_driver_home
         }
 
-        binding.btnDriverMenu.setOnClickListener {
-            binding.driverDrawerLayout.openDrawer(GravityCompat.START)
-        }
-
-        binding.bottomNavigationDriver.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.menu_driver_home -> {
-                    loadFragment(DriverHomeFragment())
-                    true
-                }
-                R.id.menu_driver_jobs -> {
-                    loadFragment(AvailableJobsFragment())
-                    true
-                }
-                R.id.menu_driver_my_deliveries -> {
-                    loadFragment(MyDeliveriesFragment())
-                    true
-                }
-                R.id.menu_driver_earnings -> {
-                    loadFragment(DriverEarningsFragment())
-                    true
-                }
-                R.id.menu_driver_history -> {
-                    loadFragment(DriverDeliveryHistoryFragment())
-                    true
-                }
-                R.id.menu_driver_profile -> {
-                    loadFragment(DriverProfileFragment())
-                    true
-                }
-                else -> false
-            }
-        }
-
-        setupDrawerButtons()
+        loadDrawerProfile()
     }
 
     override fun onResume() {
         super.onResume()
         loadDrawerProfile()
     }
+
+    private fun setupTopBar() {
+        binding.btnDriverMenu.setOnClickListener {
+            binding.driverDrawerLayout.openDrawer(GravityCompat.START)
+        }
+    }
+
+    private fun setupBottomNavigation() {
+        binding.bottomNavigationDriver.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.menu_driver_home -> {
+                    loadFragment(DriverHomeFragment(), "Driver Home")
+                    true
+                }
+
+                R.id.menu_driver_jobs -> {
+                    loadFragment(AvailableJobsFragment(), "Available Jobs")
+                    true
+                }
+
+                R.id.menu_driver_my_deliveries -> {
+                    loadFragment(MyDeliveriesFragment(), "My Jobs")
+                    true
+                }
+
+                R.id.menu_driver_history -> {
+                    loadFragment(DriverDeliveryHistoryFragment(), "Delivery History")
+                    true
+                }
+
+                else -> false
+            }
+        }
+    }
+
     private fun setupDrawerButtons() {
         binding.btnDrawerCheckProfile.setOnClickListener {
+            loadFragment(DriverProfileFragment(), "Driver Profile")
             binding.driverDrawerLayout.closeDrawer(GravityCompat.START)
-            binding.bottomNavigationDriver.selectedItemId = R.id.menu_driver_profile
         }
 
-        binding.btnDrawerGoHome.setOnClickListener {
+        binding.btnDrawerGoEarnings.setOnClickListener {
+            loadFragment(DriverEarningsFragment(), "Earnings")
             binding.driverDrawerLayout.closeDrawer(GravityCompat.START)
-            binding.bottomNavigationDriver.selectedItemId = R.id.menu_driver_home
-        }
-
-        binding.btnDrawerGoJobs.setOnClickListener {
-            binding.driverDrawerLayout.closeDrawer(GravityCompat.START)
-            binding.bottomNavigationDriver.selectedItemId = R.id.menu_driver_jobs
-        }
-
-        binding.btnDrawerGoMyJobs.setOnClickListener {
-            binding.driverDrawerLayout.closeDrawer(GravityCompat.START)
-            binding.bottomNavigationDriver.selectedItemId = R.id.menu_driver_my_deliveries
         }
 
         binding.btnDrawerLogout.setOnClickListener {
-            logout()
+            FirebaseRefs.auth.signOut()
+            sessionManager.clear()
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
         }
     }
 
@@ -154,7 +163,9 @@ class DriverMainActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun loadFragment(fragment: Fragment) {
+    private fun loadFragment(fragment: Fragment, title: String) {
+        binding.tvDriverTopTitle.text = title
+
         supportFragmentManager.beginTransaction()
             .replace(R.id.driverFragmentContainer, fragment)
             .commit()

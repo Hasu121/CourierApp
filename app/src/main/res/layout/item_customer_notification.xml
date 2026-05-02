@@ -4,36 +4,42 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    android:background="#EEEEEE"
+    android:background="@color/courier_card"
     android:orientation="vertical"
-    android:padding="12dp">
+    android:padding="14dp">
 
     <TextView
         android:id="@+id/tvNotificationTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Title"
+        android:textColor="@color/courier_green"
+        android:textSize="16sp"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tvNotificationBody"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="Body" />
+        android:layout_marginTop="7dp"
+        android:text="Body"
+        android:textColor="@color/courier_dark" />
 
     <TextView
         android:id="@+id/tvNotificationTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="Time" />
+        android:layout_marginTop="7dp"
+        android:text="Time"
+        android:textColor="@color/courier_gray_text" />
 
     <TextView
         android:id="@+id/tvReadStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="Unread" />
+        android:layout_marginTop="7dp"
+        android:text="Unread"
+        android:textColor="@color/courier_dark"
+        android:textStyle="bold" />
 
 </LinearLayout>

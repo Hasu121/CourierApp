@@ -110,6 +110,20 @@ class AuthRepository {
             }
     }
 
+    fun sendPasswordResetEmail(
+        email: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        FirebaseRefs.auth.sendPasswordResetEmail(email)
+            .addOnSuccessListener {
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                onFailure(e.message ?: "Failed to send reset email")
+            }
+    }
+
     fun registerDriver(
         fullName: String,
         email: String,

@@ -1,137 +1,230 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/courier_light_bg">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingStart="20dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="90dp">
 
         <Button
             android:id="@+id/btnBack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Back" />
+            android:backgroundTint="@color/courier_green"
+            android:text="Back"
+            android:textColor="@color/courier_white" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="Booking Details"
+            android:textColor="@color/courier_dark"
             android:textSize="24sp"
             android:textStyle="bold" />
 
-        <org.maplibre.android.maps.MapView
-            android:id="@+id/mapViewTracking"
-            android:layout_width="match_parent"
-            android:layout_height="260dp"
-            android:layout_marginTop="16dp" />
-
-        <TextView
-            android:id="@+id/tvMapInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Map preview: pickup, drop, and driver location." />
-
-        <Button
-            android:id="@+id/btnExpandTrackingMap"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="Expand Map" />
+            android:layout_marginTop="18dp"
+            android:background="@color/courier_card"
+            android:orientation="vertical"
+            android:padding="14dp">
 
-        <TextView
-            android:id="@+id/tvBookingType"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Type:" />
+            <org.maplibre.android.maps.MapView
+                android:id="@+id/mapViewTracking"
+                android:layout_width="match_parent"
+                android:layout_height="260dp" />
 
-        <TextView
-            android:id="@+id/tvStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Status:" />
+            <TextView
+                android:id="@+id/tvMapInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Map preview: pickup, drop, and driver location."
+                android:textColor="@color/courier_dark" />
 
-        <TextView
-            android:id="@+id/tvPickup"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Pickup:" />
+            <Button
+                android:id="@+id/btnExpandTrackingMap"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="@color/courier_green"
+                android:text="Expand Map"
+                android:textColor="@color/courier_white" />
 
-        <TextView
-            android:id="@+id/tvDrop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Drop:" />
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvReceiver"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Receiver:" />
+            android:layout_marginTop="14dp"
+            android:background="@color/courier_card"
+            android:orientation="vertical"
+            android:padding="14dp">
 
-        <TextView
-            android:id="@+id/tvPackage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Package:" />
+            <TextView
+                android:id="@+id/tvBookingType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Type:"
+                android:textColor="@color/courier_dark"
+                android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvFare"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Fare:" />
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Status:"
+                android:textColor="@color/courier_green"
+                android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvDistance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Distance:" />
+            <TextView
+                android:id="@+id/tvPickup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Pickup:"
+                android:textColor="@color/courier_dark" />
 
-        <TextView
-            android:id="@+id/tvCreatedAt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Created At:" />
+            <TextView
+                android:id="@+id/tvDrop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Drop:"
+                android:textColor="@color/courier_dark" />
 
-        <TextView
-            android:id="@+id/tvAssignedDriver"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Assigned Driver: Not assigned" />
+            <TextView
+                android:id="@+id/tvReceiver"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Receiver:"
+                android:textColor="@color/courier_dark" />
+
+            <TextView
+                android:id="@+id/tvPackage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Package:"
+                android:textColor="@color/courier_dark" />
+
+            <TextView
+                android:id="@+id/tvFare"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Fare:"
+                android:textColor="@color/courier_dark" />
+
+            <TextView
+                android:id="@+id/tvDistance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Distance:"
+                android:textColor="@color/courier_dark" />
+
+            <TextView
+                android:id="@+id/tvCreatedAt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Created At:"
+                android:textColor="@color/courier_gray_text" />
+
+            <TextView
+                android:id="@+id/tvAssignedDriver"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Assigned Driver: Not assigned"
+                android:textColor="@color/courier_dark" />
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/btnRefreshTracking"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
-            android:text="Refresh Tracking Map" />
+            android:backgroundTint="@color/courier_green"
+            android:text="Refresh Tracking Map"
+            android:textColor="@color/courier_white" />
 
         <Button
             android:id="@+id/btnCancelBooking"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Cancel Booking" />
+            android:backgroundTint="@color/courier_error"
+            android:text="Cancel Booking"
+            android:textColor="@color/courier_white" />
+
+        <LinearLayout
+            android:id="@+id/layoutCustomerReviewCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:background="@color/courier_card"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <TextView
+                android:id="@+id/tvCustomerReviewTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Review Driver"
+                android:textColor="@color/courier_dark"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/etCustomerRating"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Rating 1-5"
+                android:inputType="number"
+                android:textColor="@color/courier_dark"
+                android:textColorHint="@color/courier_gray_text" />
+
+            <EditText
+                android:id="@+id/etCustomerReviewComment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Comment for driver"
+                android:textColor="@color/courier_dark"
+                android:textColorHint="@color/courier_gray_text" />
+
+            <Button
+                android:id="@+id/btnSubmitCustomerReview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="@color/courier_green"
+                android:text="Submit Driver Review"
+                android:textColor="@color/courier_white" />
+
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="Status Timeline"
+            android:textColor="@color/courier_dark"
             android:textSize="18sp"
             android:textStyle="bold" />
 

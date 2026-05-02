@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.courierapp.R
 import com.example.courierapp.data.repository.AuthRepository
 import com.example.courierapp.databinding.ActivityCustomerRegisterBinding
 
@@ -16,6 +17,9 @@ class CustomerRegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityCustomerRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        window.statusBarColor = getColor(R.color.courier_green)
+        window.navigationBarColor = getColor(R.color.courier_light_bg)
 
         binding.btnRegister.setOnClickListener {
             val fullName = binding.etFullName.text.toString().trim()

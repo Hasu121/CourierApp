@@ -1,0 +1,30 @@
+<resources>
+
+    <style name="CourierTitleText">
+        <item name="android:textColor">@color/courier_dark</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="CourierSectionTitleText">
+        <item name="android:textColor">@color/courier_dark</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="CourierBodyText">
+        <item name="android:textColor">@color/courier_dark</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="CourierButton">
+        <item name="android:backgroundTint">@color/courier_green</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="CourierDangerButton">
+        <item name="android:backgroundTint">@color/courier_error</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+</resources>

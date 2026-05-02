@@ -1,14 +1,14 @@
 package com.example.courierapp.data.repository
 
 import com.example.courierapp.data.firebase.FirebaseRefs
+import com.example.courierapp.data.model.Booking
 import com.example.courierapp.data.model.DriverLocation
 import com.example.courierapp.data.model.DriverProfile
-import com.example.courierapp.data.model.User
-import com.example.courierapp.data.model.Booking
 import com.example.courierapp.data.model.Earning
-import com.example.courierapp.utils.Constants
 import com.example.courierapp.data.model.Penalty
-
+import com.example.courierapp.data.model.User
+import com.example.courierapp.utils.Constants
+import com.google.firebase.firestore.DocumentSnapshot
 
 class DriverRepository {
 
@@ -27,7 +27,11 @@ class DriverRepository {
             .get()
             .addOnSuccessListener { document ->
                 val user = document.toObject(User::class.java)
-                if (user != null) onSuccess(user) else onFailure("Driver user data not found")
+                if (user != null) {
+                    onSuccess(user)
+                } else {
+                    onFailure("Driver user data not found")
+                }
             }
             .addOnFailureListener { e ->
                 onFailure(e.message ?: "Failed to load driver user")
@@ -49,10 +53,54 @@ class DriverRepository {
             .get()
             .addOnSuccessListener { document ->
                 val profile = document.toObject(DriverProfile::class.java)
-                if (profile != null) onSuccess(profile) else onFailure("Driver profile not found")
+                if (profile != null) {
+                    onSuccess(profile)
+                } else {
+                    onFailure("Driver profile not found")
+                }
             }
             .addOnFailureListener { e ->
                 onFailure(e.message ?: "Failed to load driver profile")
+            }
+    }
+
+    fun getDriverHomeStatus(
+        onSuccess: (
+            isAvailable: Boolean,
+            lat: Double,
+            lng: Double,
+            updatedAt: Long
+        ) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val currentUser = FirebaseRefs.auth.currentUser
+        if (currentUser == null) {
+            onFailure("User not logged in")
+            return
+        }
+
+        FirebaseRefs.db.collection(FirebaseRefs.DRIVER_PROFILES)
+            .document(currentUser.uid)
+            .get()
+            .addOnSuccessListener { profileDoc ->
+                val isAvailable = profileDoc.getBoolean("isAvailable") ?: false
+
+                FirebaseRefs.db.collection(FirebaseRefs.DRIVER_LOCATIONS)
+                    .document(currentUser.uid)
+                    .get()
+                    .addOnSuccessListener { locationDoc ->
+                        val lat = locationDoc.getDouble("lat") ?: 0.0
+                        val lng = locationDoc.getDouble("lng") ?: 0.0
+                        val updatedAt = locationDoc.getLong("updatedAt") ?: 0L
+
+                        onSuccess(isAvailable, lat, lng, updatedAt)
+                    }
+                    .addOnFailureListener { e ->
+                        onFailure(e.message ?: "Failed to load driver location")
+                    }
+            }
+            .addOnFailureListener { e ->
+                onFailure(e.message ?: "Failed to load driver status")
             }
     }
 
@@ -79,6 +127,14 @@ class DriverRepository {
             .addOnFailureListener { e ->
                 onFailure(e.message ?: "Failed to update availability")
             }
+    }
+
+    fun updateDriverAvailability(
+        isAvailable: Boolean,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        updateAvailability(isAvailable, onSuccess, onFailure)
     }
 
     fun updateDriverLocation(
@@ -127,15 +183,22 @@ class DriverRepository {
             .document(currentUser.uid)
             .get()
             .addOnSuccessListener { profileDoc ->
+
+                val verificationStatus = profileDoc.getString("verificationStatus") ?: "pending"
+                if (verificationStatus != "verified") {
+                    onFailure("Your driver account is not verified yet")
+                    return@addOnSuccessListener
+                }
+
                 val serviceMode = profileDoc.get("serviceMode") as? List<*> ?: emptyList<String>()
                 val driverModes = serviceMode.mapNotNull { it?.toString() }
 
                 FirebaseRefs.db.collection(FirebaseRefs.BOOKINGS)
-                    .whereEqualTo("status", "pending")
+                    .whereEqualTo("status", Constants.STATUS_PENDING)
                     .get()
                     .addOnSuccessListener { querySnapshot ->
-                        val bookings = querySnapshot.documents.mapNotNull {
-                            it.toObject(com.example.courierapp.data.model.Booking::class.java)
+                        val bookings = querySnapshot.documents.mapNotNull { doc ->
+                            mapBookingDocument(doc)
                         }
 
                         val filteredJobs = bookings.filter { booking ->
@@ -191,20 +254,20 @@ class DriverRepository {
                 val currentStatus = document.getString("status").orEmpty()
                 val assignedDriverId = document.getString("assignedDriverId").orEmpty()
 
-                if (currentStatus != "pending" || assignedDriverId.isNotEmpty()) {
+                if (currentStatus != Constants.STATUS_PENDING || assignedDriverId.isNotEmpty()) {
                     onFailure("This job is no longer available")
                     return@addOnSuccessListener
                 }
 
                 val bookingUpdates = mapOf(
                     "assignedDriverId" to driverId,
-                    "status" to "accepted",
+                    "status" to Constants.STATUS_ACCEPTED,
                     "updatedAt" to now
                 )
 
                 val statusLog = mapOf(
                     "bookingId" to bookingId,
-                    "status" to "accepted",
+                    "status" to Constants.STATUS_ACCEPTED,
                     "changedBy" to driverId,
                     "note" to "Driver accepted the booking",
                     "timestamp" to now
@@ -221,15 +284,12 @@ class DriverRepository {
                 )
 
                 val batch = FirebaseRefs.db.batch()
-
                 batch.update(bookingRef, bookingUpdates)
                 batch.set(logRef, statusLog)
                 batch.set(notificationRef, notification)
 
                 batch.commit()
-                    .addOnSuccessListener {
-                        onSuccess()
-                    }
+                    .addOnSuccessListener { onSuccess() }
                     .addOnFailureListener { e ->
                         onFailure(e.message ?: "Failed to accept job")
                     }
@@ -254,38 +314,10 @@ class DriverRepository {
             .get()
             .addOnSuccessListener { querySnapshot ->
                 val deliveries = querySnapshot.documents.mapNotNull { doc ->
-                    try {
-                        Booking(
-                            bookingId = doc.getString("bookingId").orEmpty(),
-                            customerId = doc.getString("customerId").orEmpty(),
-                            assignedDriverId = doc.getString("assignedDriverId").orEmpty(),
-                            bookingType = doc.getString("bookingType").orEmpty(),
-                            pickupAddress = doc.getString("pickupAddress").orEmpty(),
-                            pickupLat = doc.getDouble("pickupLat") ?: 0.0,
-                            pickupLng = doc.getDouble("pickupLng") ?: 0.0,
-                            dropAddress = doc.getString("dropAddress").orEmpty(),
-                            dropLat = doc.getDouble("dropLat") ?: 0.0,
-                            dropLng = doc.getDouble("dropLng") ?: 0.0,
-                            distanceKm = doc.getDouble("distanceKm") ?: 0.0,
-                            packageType = doc.getString("packageType").orEmpty(),
-                            packageWeight = doc.getString("packageWeight").orEmpty(),
-                            packageNote = doc.getString("packageNote").orEmpty(),
-                            receiverName = doc.getString("receiverName").orEmpty(),
-                            receiverPhone = doc.getString("receiverPhone").orEmpty(),
-                            preferredTime = doc.getString("preferredTime").orEmpty(),
-                            estimatedFare = doc.getDouble("estimatedFare") ?: 0.0,
-                            finalFare = doc.getDouble("finalFare") ?: 0.0,
-                            paymentMethod = doc.getString("paymentMethod") ?: "cash",
-                            paymentStatus = doc.getString("paymentStatus") ?: "pending",
-                            status = doc.getString("status") ?: "pending",
-                            createdAt = doc.getLong("createdAt") ?: 0L,
-                            updatedAt = doc.getLong("updatedAt") ?: 0L
-                        )
-                    } catch (e: Exception) {
-                        null
-                    }
+                    mapBookingDocument(doc)
                 }.filter { booking ->
-                    booking.status != "delivered" && booking.status != "cancelled"
+                    booking.status != Constants.STATUS_DELIVERED &&
+                            booking.status != Constants.STATUS_CANCELLED
                 }.sortedByDescending { it.updatedAt }
 
                 onSuccess(deliveries)
@@ -424,9 +456,7 @@ class DriverRepository {
                 FirebaseRefs.db.collection(FirebaseRefs.EARNINGS)
                     .document(booking.bookingId)
                     .set(earning)
-                    .addOnSuccessListener {
-                        onSuccess()
-                    }
+                    .addOnSuccessListener { onSuccess() }
                     .addOnFailureListener { e ->
                         onFailure(e.message ?: "Delivery completed but earning failed")
                     }
@@ -475,7 +505,6 @@ class DriverRepository {
                 }.sortedByDescending { it.createdAt }
 
                 val totalEarnings = earnings.sumOf { it.amount }
-
                 val startOfToday = getStartOfTodayMillis()
                 val todayEarnings = earnings
                     .filter { it.createdAt >= startOfToday }
@@ -488,15 +517,6 @@ class DriverRepository {
             .addOnFailureListener { e ->
                 onFailure(e.message ?: "Failed to load earnings")
             }
-    }
-
-    private fun getStartOfTodayMillis(): Long {
-        val calendar = java.util.Calendar.getInstance()
-        calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
-        calendar.set(java.util.Calendar.MINUTE, 0)
-        calendar.set(java.util.Calendar.SECOND, 0)
-        calendar.set(java.util.Calendar.MILLISECOND, 0)
-        return calendar.timeInMillis
     }
 
     fun getDeliveryHistory(
@@ -515,36 +535,7 @@ class DriverRepository {
             .get()
             .addOnSuccessListener { querySnapshot ->
                 val deliveries = querySnapshot.documents.mapNotNull { doc ->
-                    try {
-                        Booking(
-                            bookingId = doc.getString("bookingId").orEmpty(),
-                            customerId = doc.getString("customerId").orEmpty(),
-                            assignedDriverId = doc.getString("assignedDriverId").orEmpty(),
-                            bookingType = doc.getString("bookingType").orEmpty(),
-                            pickupAddress = doc.getString("pickupAddress").orEmpty(),
-                            pickupLat = doc.getDouble("pickupLat") ?: 0.0,
-                            pickupLng = doc.getDouble("pickupLng") ?: 0.0,
-                            dropAddress = doc.getString("dropAddress").orEmpty(),
-                            dropLat = doc.getDouble("dropLat") ?: 0.0,
-                            dropLng = doc.getDouble("dropLng") ?: 0.0,
-                            distanceKm = doc.getDouble("distanceKm") ?: 0.0,
-                            packageType = doc.getString("packageType").orEmpty(),
-                            packageWeight = doc.getString("packageWeight").orEmpty(),
-                            packageNote = doc.getString("packageNote").orEmpty(),
-                            receiverName = doc.getString("receiverName").orEmpty(),
-                            receiverPhone = doc.getString("receiverPhone").orEmpty(),
-                            preferredTime = doc.getString("preferredTime").orEmpty(),
-                            estimatedFare = doc.getDouble("estimatedFare") ?: 0.0,
-                            finalFare = doc.getDouble("finalFare") ?: 0.0,
-                            paymentMethod = doc.getString("paymentMethod") ?: Constants.PAYMENT_CASH,
-                            paymentStatus = doc.getString("paymentStatus") ?: Constants.PAYMENT_PAID,
-                            status = doc.getString("status") ?: Constants.STATUS_DELIVERED,
-                            createdAt = doc.getLong("createdAt") ?: 0L,
-                            updatedAt = doc.getLong("updatedAt") ?: 0L
-                        )
-                    } catch (e: Exception) {
-                        null
-                    }
+                    mapBookingDocument(doc)
                 }.sortedByDescending { it.updatedAt }
 
                 onSuccess(deliveries)
@@ -559,7 +550,9 @@ class DriverRepository {
         onSuccess: (Map<String, String>) -> Unit,
         onFailure: (String) -> Unit
     ) {
-        val customerIds = bookings.map { it.customerId }.distinct().filter { it.isNotEmpty() }
+        val customerIds = bookings.map { it.customerId }
+            .distinct()
+            .filter { it.isNotEmpty() }
 
         if (customerIds.isEmpty()) {
             onSuccess(emptyMap())
@@ -574,17 +567,18 @@ class DriverRepository {
                 .document(customerId)
                 .get()
                 .addOnSuccessListener { document ->
-                    resultMap[customerId] = document.getString("fullName") ?: "Unknown Customer"
-                    completedRequests++
+                    resultMap[customerId] =
+                        document.getString("fullName") ?: "Unknown Customer"
 
+                    completedRequests++
                     if (completedRequests == customerIds.size) {
                         onSuccess(resultMap)
                     }
                 }
                 .addOnFailureListener {
                     resultMap[customerId] = "Unknown Customer"
-                    completedRequests++
 
+                    completedRequests++
                     if (completedRequests == customerIds.size) {
                         onSuccess(resultMap)
                     }
@@ -659,7 +653,10 @@ class DriverRepository {
                 val latestStatus = document.getString("status").orEmpty()
                 val latestAssignedDriverId = document.getString("assignedDriverId").orEmpty()
 
-                if (latestStatus != Constants.STATUS_ACCEPTED || latestAssignedDriverId != currentUser.uid) {
+                if (
+                    latestStatus != Constants.STATUS_ACCEPTED ||
+                    latestAssignedDriverId != currentUser.uid
+                ) {
                     onFailure("This job can no longer be rejected")
                     return@addOnSuccessListener
                 }
@@ -695,5 +692,60 @@ class DriverRepository {
             .addOnFailureListener { e ->
                 onFailure(e.message ?: "Failed to check job status")
             }
+    }
+
+    private fun mapBookingDocument(doc: DocumentSnapshot): Booking? {
+        return try {
+            Booking(
+                bookingId = doc.getString("bookingId").orEmpty(),
+                customerId = doc.getString("customerId").orEmpty(),
+                assignedDriverId = doc.getString("assignedDriverId").orEmpty(),
+                bookingType = doc.getString("bookingType").orEmpty(),
+
+                pickupAddress = doc.getString("pickupAddress").orEmpty(),
+                pickupLat = doc.getDouble("pickupLat") ?: 0.0,
+                pickupLng = doc.getDouble("pickupLng") ?: 0.0,
+
+                dropAddress = doc.getString("dropAddress").orEmpty(),
+                dropLat = doc.getDouble("dropLat") ?: 0.0,
+                dropLng = doc.getDouble("dropLng") ?: 0.0,
+
+                distanceKm = doc.getDouble("distanceKm") ?: 0.0,
+
+                packageType = doc.getString("packageType").orEmpty(),
+                packageWeight = doc.getString("packageWeight").orEmpty(),
+                packageNote = doc.getString("packageNote").orEmpty(),
+
+                receiverName = doc.getString("receiverName").orEmpty(),
+                receiverPhone = doc.getString("receiverPhone").orEmpty(),
+                preferredTime = doc.getString("preferredTime").orEmpty(),
+
+                estimatedFare = doc.getDouble("estimatedFare") ?: 0.0,
+                finalFare = doc.getDouble("finalFare") ?: 0.0,
+
+                paymentMethod = doc.getString("paymentMethod") ?: Constants.PAYMENT_CASH,
+                paymentStatus = doc.getString("paymentStatus") ?: Constants.PAYMENT_PENDING,
+
+                status = doc.getString("status") ?: Constants.STATUS_PENDING,
+                cancelledBy = doc.getString("cancelledBy").orEmpty(),
+                rejectedBy = doc.getString("rejectedBy").orEmpty(),
+                cancelPenaltyApplied = doc.getDouble("cancelPenaltyApplied") ?: 0.0,
+                driverPenaltyApplied = doc.getDouble("driverPenaltyApplied") ?: 0.0,
+
+                createdAt = doc.getLong("createdAt") ?: 0L,
+                updatedAt = doc.getLong("updatedAt") ?: 0L
+            )
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun getStartOfTodayMillis(): Long {
+        val calendar = java.util.Calendar.getInstance()
+        calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+        calendar.set(java.util.Calendar.MINUTE, 0)
+        calendar.set(java.util.Calendar.SECOND, 0)
+        calendar.set(java.util.Calendar.MILLISECOND, 0)
+        return calendar.timeInMillis
     }
 }

@@ -18,4 +18,6 @@ object FirebaseRefs {
     const val REVIEWS = "reviews"
     const val VEHICLES = "vehicles"
     const val ADMIN_SETTINGS = "admin_settings"
+    const val EARNINGS = "earnings"
+    const val PENALTIES = "penalties"
 }

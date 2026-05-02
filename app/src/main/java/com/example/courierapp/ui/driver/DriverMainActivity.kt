@@ -15,6 +15,8 @@ import com.example.courierapp.ui.driver.jobs.AvailableJobsFragment
 import com.example.courierapp.ui.driver.jobs.MyDeliveriesFragment
 import com.example.courierapp.ui.driver.profile.DriverProfileFragment
 import com.example.courierapp.utils.InsetHelper
+import com.example.courierapp.ui.driver.earnings.DriverEarningsFragment
+import com.example.courierapp.ui.driver.history.DriverDeliveryHistoryFragment
 
 class DriverMainActivity : AppCompatActivity() {
 
@@ -61,28 +63,28 @@ class DriverMainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.menu_driver_home -> {
                     loadFragment(DriverHomeFragment())
-                    binding.tvDriverTopTitle.text = "Driver Home"
                     true
                 }
-
                 R.id.menu_driver_jobs -> {
                     loadFragment(AvailableJobsFragment())
-                    binding.tvDriverTopTitle.text = "Available Jobs"
                     true
                 }
-
                 R.id.menu_driver_my_deliveries -> {
                     loadFragment(MyDeliveriesFragment())
-                    binding.tvDriverTopTitle.text = "My Jobs"
                     true
                 }
-
+                R.id.menu_driver_earnings -> {
+                    loadFragment(DriverEarningsFragment())
+                    true
+                }
+                R.id.menu_driver_history -> {
+                    loadFragment(DriverDeliveryHistoryFragment())
+                    true
+                }
                 R.id.menu_driver_profile -> {
                     loadFragment(DriverProfileFragment())
-                    binding.tvDriverTopTitle.text = "Profile"
                     true
                 }
-
                 else -> false
             }
         }

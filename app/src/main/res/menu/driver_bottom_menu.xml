@@ -17,6 +17,16 @@
         android:title="My Jobs" />
 
     <item
+        android:id="@+id/menu_driver_earnings"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:title="Earnings" />
+
+    <item
+        android:id="@+id/menu_driver_history"
+        android:icon="@android:drawable/ic_menu_recent_history"
+        android:title="History" />
+
+    <item
         android:id="@+id/menu_driver_profile"
         android:icon="@android:drawable/ic_menu_manage"
         android:title="Profile" />

@@ -8,6 +8,7 @@ import com.example.courierapp.databinding.ItemBookingHistoryBinding
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.example.courierapp.utils.StatusFormatter
 
 class BookingHistoryAdapter(
     private var items: List<Booking>,
@@ -19,7 +20,7 @@ class BookingHistoryAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: Booking) {
-            binding.tvStatus.text = "Status: ${item.status}"
+            binding.tvStatus.text = "Status: ${StatusFormatter.formatStatus(item.status)}"
             binding.tvBookingType.text = "Type: ${item.bookingType}"
             binding.tvPickup.text = "Pickup: ${item.pickupAddress}"
             binding.tvDrop.text = "Drop: ${item.dropAddress}"

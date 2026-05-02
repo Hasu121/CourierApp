@@ -24,5 +24,9 @@ data class Booking(
     val paymentStatus: String = "pending",
     val status: String = "pending",
     val createdAt: Long = 0L,
-    val updatedAt: Long = 0L
+    val updatedAt: Long = 0L,
+    val cancelledBy: String = "",
+    val cancelPenaltyApplied: Double = 0.0,
+    val rejectedBy: String = "",
+    val driverPenaltyApplied: Double = 0.0,
 )

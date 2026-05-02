@@ -3,6 +3,7 @@ package com.example.courierapp.utils
 object Constants {
     const val ROLE_CUSTOMER = "customer"
     const val ROLE_DRIVER = "driver"
+    const val ROLE_ADMIN = "admin"
 
     const val STATUS_PENDING = "pending"
     const val STATUS_ACCEPTED = "accepted"
@@ -10,6 +11,17 @@ object Constants {
     const val STATUS_IN_TRANSIT = "in_transit"
     const val STATUS_DELIVERED = "delivered"
     const val STATUS_CANCELLED = "cancelled"
+    const val STATUS_REJECTED = "rejected"
+
+    const val PAYMENT_CASH = "cash"
+    const val PAYMENT_PENDING = "pending"
+    const val PAYMENT_PAID = "paid"
+
+    const val EARNING_TYPE_DELIVERY = "delivery_earning"
+
+    const val CUSTOMER_CANCEL_PENALTY = 50.0
+
+    const val DRIVER_REJECT_PENALTY = 50.0
 }
 
 object FareConfig {

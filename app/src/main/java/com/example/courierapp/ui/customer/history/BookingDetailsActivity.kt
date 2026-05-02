@@ -9,6 +9,7 @@ import com.example.courierapp.data.model.Booking
 import com.example.courierapp.data.repository.CustomerRepository
 import com.example.courierapp.databinding.ActivityBookingDetailsBinding
 import com.example.courierapp.ui.common.BookingStatusLogAdapter
+import com.example.courierapp.utils.Constants
 import org.maplibre.android.MapLibre
 import com.example.courierapp.ui.common.TrackingMapDialogFragment
 import org.maplibre.android.annotations.Marker
@@ -78,6 +79,27 @@ class BookingDetailsActivity : AppCompatActivity() {
             }
         }
 
+        binding.btnCancelBooking.setOnClickListener {
+            val booking = currentBooking
+
+            if (booking == null) {
+                Toast.makeText(this, "Booking not loaded yet", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            customerRepository.cancelBooking(
+                booking = booking,
+                onSuccess = {
+                    Toast.makeText(this, "Booking cancelled. Penalty will apply to your next booking.", Toast.LENGTH_LONG).show()
+                    loadBookingDetails(booking.bookingId)
+                    loadBookingLogs(booking.bookingId)
+                },
+                onFailure = { message ->
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                }
+            )
+        }
+
         logAdapter = BookingStatusLogAdapter(emptyList())
         binding.rvStatusTimeline.layoutManager = LinearLayoutManager(this)
         binding.rvStatusTimeline.adapter = logAdapter
@@ -121,6 +143,15 @@ class BookingDetailsActivity : AppCompatActivity() {
                     "Assigned Driver: Not assigned"
                 } else {
                     "Assigned Driver: ${booking.assignedDriverId}"
+                }
+
+                binding.btnCancelBooking.visibility = if (
+                    booking.status == Constants.STATUS_PENDING ||
+                    booking.status == Constants.STATUS_ACCEPTED
+                ) {
+                    android.view.View.VISIBLE
+                } else {
+                    android.view.View.GONE
                 }
 
                 val formattedDate = if (booking.createdAt > 0L) {

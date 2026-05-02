@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.courierapp.data.model.Booking
 import com.example.courierapp.databinding.ItemAvailableJobBinding
+import com.example.courierapp.utils.StatusFormatter
 
 class AvailableJobsAdapter(
     private var items: List<Booking>,
@@ -23,7 +24,7 @@ class AvailableJobsAdapter(
             binding.tvReceiver.text = "Receiver: ${item.receiverName} (${item.receiverPhone})"
             binding.tvFareDistance.text =
                 "Fare: ৳${item.estimatedFare.toInt()} | Distance: ${"%.2f".format(item.distanceKm)} km"
-            binding.tvStatus.text = "Status: ${item.status}"
+            binding.tvStatus.text = "Status: ${StatusFormatter.formatStatus(item.status)}"
 
             binding.btnAcceptJob.setOnClickListener {
                 onAcceptClick(item)

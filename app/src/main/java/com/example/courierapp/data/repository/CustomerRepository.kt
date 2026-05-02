@@ -4,6 +4,7 @@ import com.example.courierapp.data.firebase.FirebaseRefs
 import com.example.courierapp.data.model.Booking
 import com.example.courierapp.data.model.User
 import com.example.courierapp.data.model.BookingStatusLog
+import com.example.courierapp.utils.Constants
 
 class CustomerRepository {
 
@@ -147,6 +148,106 @@ class CustomerRepository {
             .addOnFailureListener { e ->
                 onFailure(e.message ?: "Failed to load driver location")
             }
+    }
+
+    fun cancelBooking(
+        booking: Booking,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val currentUser = FirebaseRefs.auth.currentUser
+        if (currentUser == null) {
+            onFailure("User not logged in")
+            return
+        }
+
+        val cancellableStatuses = listOf(
+            Constants.STATUS_PENDING,
+            Constants.STATUS_ACCEPTED
+        )
+
+        if (!cancellableStatuses.contains(booking.status)) {
+            onFailure("This booking can no longer be cancelled")
+            return
+        }
+
+        val now = System.currentTimeMillis()
+
+        val bookingUpdates = mapOf(
+            "status" to Constants.STATUS_CANCELLED,
+            "cancelledBy" to currentUser.uid,
+            "updatedAt" to now
+        )
+
+        val statusLog = mapOf(
+            "bookingId" to booking.bookingId,
+            "status" to Constants.STATUS_CANCELLED,
+            "changedBy" to currentUser.uid,
+            "note" to "Customer cancelled the booking",
+            "timestamp" to now
+        )
+
+        val userPenaltyUpdates = mapOf(
+            "cancelPenaltyPending" to true,
+            "cancelPenaltyAmount" to Constants.CUSTOMER_CANCEL_PENALTY,
+            "updatedAt" to now
+        )
+
+        FirebaseRefs.db.collection(FirebaseRefs.BOOKINGS)
+            .document(booking.bookingId)
+            .update(bookingUpdates)
+            .addOnSuccessListener {
+                FirebaseRefs.db.collection(FirebaseRefs.BOOKING_STATUS_LOGS)
+                    .add(statusLog)
+                    .addOnSuccessListener {
+                        FirebaseRefs.db.collection(FirebaseRefs.USERS)
+                            .document(currentUser.uid)
+                            .update(userPenaltyUpdates)
+                            .addOnSuccessListener {
+                                if (booking.assignedDriverId.isNotEmpty()) {
+                                    createDriverCancellationNotification(
+                                        driverId = booking.assignedDriverId,
+                                        bookingId = booking.bookingId,
+                                        onDone = onSuccess
+                                    )
+                                } else {
+                                    onSuccess()
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                onFailure(e.message ?: "Booking cancelled but penalty update failed")
+                            }
+                    }
+                    .addOnFailureListener { e ->
+                        onFailure(e.message ?: "Booking cancelled but log failed")
+                    }
+            }
+            .addOnFailureListener { e ->
+                onFailure(e.message ?: "Failed to cancel booking")
+            }
+    }
+
+    private fun createDriverCancellationNotification(
+        driverId: String,
+        bookingId: String,
+        onDone: () -> Unit
+    ) {
+        val now = System.currentTimeMillis()
+
+        val notification = mapOf(
+            "userId" to driverId,
+            "title" to "Booking Cancelled",
+            "body" to "A customer cancelled an assigned booking.",
+            "type" to "booking_cancelled",
+            "relatedBookingId" to bookingId,
+            "isRead" to false,
+            "createdAt" to now
+        )
+
+        FirebaseRefs.db.collection(FirebaseRefs.NOTIFICATIONS)
+            .add(notification)
+            .addOnSuccessListener { onDone() }
+            .addOnFailureListener { onDone() }
     }
 
 }

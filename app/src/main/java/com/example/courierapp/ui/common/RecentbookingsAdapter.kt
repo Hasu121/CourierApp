@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.courierapp.data.model.Booking
 import com.example.courierapp.databinding.ItemRecentBookingBinding
+import com.example.courierapp.utils.StatusFormatter
 
 class RecentBookingsAdapter(
     private var items: List<Booking>
@@ -16,7 +17,7 @@ class RecentBookingsAdapter(
         fun bind(item: Booking) {
             binding.tvBookingType.text = "Type: ${item.bookingType}"
             binding.tvAddresses.text = "From: ${item.pickupAddress}\nTo: ${item.dropAddress}"
-            binding.tvStatus.text = "Status: ${item.status}"
+            binding.tvStatus.text = "Status: ${StatusFormatter.formatStatus(item.status)}"
             binding.tvReceiver.text = "Receiver: ${item.receiverName}"
         }
     }

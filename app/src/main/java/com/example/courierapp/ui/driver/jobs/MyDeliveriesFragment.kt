@@ -33,9 +33,15 @@ class MyDeliveriesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = MyDeliveriesAdapter(emptyList()) { booking ->
-            updateToNextStatus(booking)
-        }
+        adapter = MyDeliveriesAdapter(
+            items = emptyList(),
+            onNextStatusClick = { booking ->
+                updateToNextStatus(booking)
+            },
+            onRejectClick = { booking ->
+                rejectJob(booking)
+            }
+        )
 
         binding.rvMyDeliveries.layoutManager = LinearLayoutManager(requireContext())
         binding.rvMyDeliveries.adapter = adapter
@@ -73,6 +79,20 @@ class MyDeliveriesFragment : Fragment() {
             newStatus = nextStatus,
             onSuccess = {
                 Toast.makeText(requireContext(), "Status updated to $nextStatus", Toast.LENGTH_SHORT).show()
+                loadMyDeliveries()
+            },
+            onFailure = { message ->
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                loadMyDeliveries()
+            }
+        )
+    }
+
+    private fun rejectJob(booking: Booking) {
+        driverRepository.rejectJob(
+            booking = booking,
+            onSuccess = {
+                Toast.makeText(requireContext(), "Job rejected. Penalty applied.", Toast.LENGTH_LONG).show()
                 loadMyDeliveries()
             },
             onFailure = { message ->

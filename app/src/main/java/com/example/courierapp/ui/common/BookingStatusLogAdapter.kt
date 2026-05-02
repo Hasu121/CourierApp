@@ -8,6 +8,7 @@ import com.example.courierapp.databinding.ItemBookingStatusLogBinding
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.example.courierapp.utils.StatusFormatter
 
 class BookingStatusLogAdapter(
     private var items: List<BookingStatusLog>
@@ -18,7 +19,7 @@ class BookingStatusLogAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: BookingStatusLog) {
-            binding.tvStatus.text = "Status: ${item.status}"
+            binding.tvStatus.text = "Status: ${StatusFormatter.formatStatus(item.status)}"
             binding.tvNote.text = "Note: ${item.note}"
 
             val formattedDate = if (item.timestamp > 0L) {

@@ -5,6 +5,9 @@ import com.example.courierapp.data.model.DriverLocation
 import com.example.courierapp.data.model.DriverProfile
 import com.example.courierapp.data.model.User
 import com.example.courierapp.data.model.Booking
+import com.example.courierapp.data.model.Earning
+import com.example.courierapp.utils.Constants
+import com.example.courierapp.data.model.Penalty
 
 
 class DriverRepository {
@@ -306,10 +309,22 @@ class DriverRepository {
 
         val now = System.currentTimeMillis()
 
-        val bookingUpdates = mapOf(
+        val finalFare = if (newStatus == Constants.STATUS_DELIVERED) {
+            booking.estimatedFare
+        } else {
+            booking.finalFare
+        }
+
+        val bookingUpdates = mutableMapOf<String, Any>(
             "status" to newStatus,
             "updatedAt" to now
         )
+
+        if (newStatus == Constants.STATUS_DELIVERED) {
+            bookingUpdates["paymentMethod"] = Constants.PAYMENT_CASH
+            bookingUpdates["paymentStatus"] = Constants.PAYMENT_PAID
+            bookingUpdates["finalFare"] = finalFare
+        }
 
         val statusLog = mapOf(
             "bookingId" to booking.bookingId,
@@ -339,10 +354,30 @@ class DriverRepository {
                         FirebaseRefs.db.collection(FirebaseRefs.NOTIFICATIONS)
                             .add(notification)
                             .addOnSuccessListener {
-                                onSuccess()
+                                if (newStatus == Constants.STATUS_DELIVERED) {
+                                    createEarningForDeliveredBooking(
+                                        booking = booking,
+                                        amount = finalFare,
+                                        createdAt = now,
+                                        onSuccess = onSuccess,
+                                        onFailure = onFailure
+                                    )
+                                } else {
+                                    onSuccess()
+                                }
                             }
                             .addOnFailureListener {
-                                onSuccess()
+                                if (newStatus == Constants.STATUS_DELIVERED) {
+                                    createEarningForDeliveredBooking(
+                                        booking = booking,
+                                        amount = finalFare,
+                                        createdAt = now,
+                                        onSuccess = onSuccess,
+                                        onFailure = onFailure
+                                    )
+                                } else {
+                                    onSuccess()
+                                }
                             }
                     }
                     .addOnFailureListener { e ->
@@ -351,6 +386,314 @@ class DriverRepository {
             }
             .addOnFailureListener { e ->
                 onFailure(e.message ?: "Failed to update delivery status")
+            }
+    }
+
+    private fun createEarningForDeliveredBooking(
+        booking: Booking,
+        amount: Double,
+        createdAt: Long,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val currentUser = FirebaseRefs.auth.currentUser
+        if (currentUser == null) {
+            onFailure("User not logged in")
+            return
+        }
+
+        FirebaseRefs.db.collection(FirebaseRefs.USERS)
+            .document(booking.customerId)
+            .get()
+            .addOnSuccessListener { customerDoc ->
+                val customerName = customerDoc.getString("fullName").orEmpty()
+
+                val earning = Earning(
+                    earningId = booking.bookingId,
+                    driverId = currentUser.uid,
+                    bookingId = booking.bookingId,
+                    customerId = booking.customerId,
+                    customerName = customerName,
+                    dropAddress = booking.dropAddress,
+                    amount = amount,
+                    paymentMethod = Constants.PAYMENT_CASH,
+                    paymentStatus = Constants.PAYMENT_PAID,
+                    createdAt = createdAt
+                )
+
+                FirebaseRefs.db.collection(FirebaseRefs.EARNINGS)
+                    .document(booking.bookingId)
+                    .set(earning)
+                    .addOnSuccessListener {
+                        onSuccess()
+                    }
+                    .addOnFailureListener { e ->
+                        onFailure(e.message ?: "Delivery completed but earning failed")
+                    }
+            }
+            .addOnFailureListener { e ->
+                onFailure(e.message ?: "Failed to load customer info for earning")
+            }
+    }
+
+    fun getDriverEarnings(
+        onSuccess: (
+            totalEarnings: Double,
+            todayEarnings: Double,
+            completedCount: Int,
+            earnings: List<Earning>
+        ) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val currentUser = FirebaseRefs.auth.currentUser
+        if (currentUser == null) {
+            onFailure("User not logged in")
+            return
+        }
+
+        FirebaseRefs.db.collection(FirebaseRefs.EARNINGS)
+            .whereEqualTo("driverId", currentUser.uid)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val earnings = querySnapshot.documents.mapNotNull { doc ->
+                    try {
+                        Earning(
+                            earningId = doc.getString("earningId").orEmpty(),
+                            driverId = doc.getString("driverId").orEmpty(),
+                            bookingId = doc.getString("bookingId").orEmpty(),
+                            customerId = doc.getString("customerId").orEmpty(),
+                            customerName = doc.getString("customerName").orEmpty(),
+                            dropAddress = doc.getString("dropAddress").orEmpty(),
+                            amount = doc.getDouble("amount") ?: 0.0,
+                            paymentMethod = doc.getString("paymentMethod") ?: Constants.PAYMENT_CASH,
+                            paymentStatus = doc.getString("paymentStatus") ?: Constants.PAYMENT_PAID,
+                            createdAt = doc.getLong("createdAt") ?: 0L
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
+                }.sortedByDescending { it.createdAt }
+
+                val totalEarnings = earnings.sumOf { it.amount }
+
+                val startOfToday = getStartOfTodayMillis()
+                val todayEarnings = earnings
+                    .filter { it.createdAt >= startOfToday }
+                    .sumOf { it.amount }
+
+                val completedCount = earnings.size
+
+                onSuccess(totalEarnings, todayEarnings, completedCount, earnings)
+            }
+            .addOnFailureListener { e ->
+                onFailure(e.message ?: "Failed to load earnings")
+            }
+    }
+
+    private fun getStartOfTodayMillis(): Long {
+        val calendar = java.util.Calendar.getInstance()
+        calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+        calendar.set(java.util.Calendar.MINUTE, 0)
+        calendar.set(java.util.Calendar.SECOND, 0)
+        calendar.set(java.util.Calendar.MILLISECOND, 0)
+        return calendar.timeInMillis
+    }
+
+    fun getDeliveryHistory(
+        onSuccess: (List<Booking>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val currentUser = FirebaseRefs.auth.currentUser
+        if (currentUser == null) {
+            onFailure("User not logged in")
+            return
+        }
+
+        FirebaseRefs.db.collection(FirebaseRefs.BOOKINGS)
+            .whereEqualTo("assignedDriverId", currentUser.uid)
+            .whereEqualTo("status", Constants.STATUS_DELIVERED)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val deliveries = querySnapshot.documents.mapNotNull { doc ->
+                    try {
+                        Booking(
+                            bookingId = doc.getString("bookingId").orEmpty(),
+                            customerId = doc.getString("customerId").orEmpty(),
+                            assignedDriverId = doc.getString("assignedDriverId").orEmpty(),
+                            bookingType = doc.getString("bookingType").orEmpty(),
+                            pickupAddress = doc.getString("pickupAddress").orEmpty(),
+                            pickupLat = doc.getDouble("pickupLat") ?: 0.0,
+                            pickupLng = doc.getDouble("pickupLng") ?: 0.0,
+                            dropAddress = doc.getString("dropAddress").orEmpty(),
+                            dropLat = doc.getDouble("dropLat") ?: 0.0,
+                            dropLng = doc.getDouble("dropLng") ?: 0.0,
+                            distanceKm = doc.getDouble("distanceKm") ?: 0.0,
+                            packageType = doc.getString("packageType").orEmpty(),
+                            packageWeight = doc.getString("packageWeight").orEmpty(),
+                            packageNote = doc.getString("packageNote").orEmpty(),
+                            receiverName = doc.getString("receiverName").orEmpty(),
+                            receiverPhone = doc.getString("receiverPhone").orEmpty(),
+                            preferredTime = doc.getString("preferredTime").orEmpty(),
+                            estimatedFare = doc.getDouble("estimatedFare") ?: 0.0,
+                            finalFare = doc.getDouble("finalFare") ?: 0.0,
+                            paymentMethod = doc.getString("paymentMethod") ?: Constants.PAYMENT_CASH,
+                            paymentStatus = doc.getString("paymentStatus") ?: Constants.PAYMENT_PAID,
+                            status = doc.getString("status") ?: Constants.STATUS_DELIVERED,
+                            createdAt = doc.getLong("createdAt") ?: 0L,
+                            updatedAt = doc.getLong("updatedAt") ?: 0L
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
+                }.sortedByDescending { it.updatedAt }
+
+                onSuccess(deliveries)
+            }
+            .addOnFailureListener { e ->
+                onFailure(e.message ?: "Failed to load delivery history")
+            }
+    }
+
+    fun getCustomerNamesForBookings(
+        bookings: List<Booking>,
+        onSuccess: (Map<String, String>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val customerIds = bookings.map { it.customerId }.distinct().filter { it.isNotEmpty() }
+
+        if (customerIds.isEmpty()) {
+            onSuccess(emptyMap())
+            return
+        }
+
+        val resultMap = mutableMapOf<String, String>()
+        var completedRequests = 0
+
+        customerIds.forEach { customerId ->
+            FirebaseRefs.db.collection(FirebaseRefs.USERS)
+                .document(customerId)
+                .get()
+                .addOnSuccessListener { document ->
+                    resultMap[customerId] = document.getString("fullName") ?: "Unknown Customer"
+                    completedRequests++
+
+                    if (completedRequests == customerIds.size) {
+                        onSuccess(resultMap)
+                    }
+                }
+                .addOnFailureListener {
+                    resultMap[customerId] = "Unknown Customer"
+                    completedRequests++
+
+                    if (completedRequests == customerIds.size) {
+                        onSuccess(resultMap)
+                    }
+                }
+        }
+    }
+
+    fun rejectJob(
+        booking: Booking,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val currentUser = FirebaseRefs.auth.currentUser
+        if (currentUser == null) {
+            onFailure("User not logged in")
+            return
+        }
+
+        if (booking.status != Constants.STATUS_ACCEPTED) {
+            onFailure("You can only reject before pickup")
+            return
+        }
+
+        if (booking.assignedDriverId != currentUser.uid) {
+            onFailure("This job is not assigned to you")
+            return
+        }
+
+        val now = System.currentTimeMillis()
+        val penaltyId = FirebaseRefs.db.collection(FirebaseRefs.PENALTIES).document().id
+
+        val bookingUpdates = mapOf(
+            "assignedDriverId" to "",
+            "status" to Constants.STATUS_PENDING,
+            "rejectedBy" to currentUser.uid,
+            "driverPenaltyApplied" to Constants.DRIVER_REJECT_PENALTY,
+            "updatedAt" to now
+        )
+
+        val statusLog = mapOf(
+            "bookingId" to booking.bookingId,
+            "status" to Constants.STATUS_REJECTED,
+            "changedBy" to currentUser.uid,
+            "note" to "Driver rejected the booking before pickup. Job returned to available list.",
+            "timestamp" to now
+        )
+
+        val penalty = Penalty(
+            penaltyId = penaltyId,
+            userId = currentUser.uid,
+            role = Constants.ROLE_DRIVER,
+            bookingId = booking.bookingId,
+            amount = Constants.DRIVER_REJECT_PENALTY,
+            reason = "driver_rejected_before_pickup",
+            createdAt = now
+        )
+
+        val notification = mapOf(
+            "userId" to booking.customerId,
+            "title" to "Driver Rejected Booking",
+            "body" to "Your booking is available for another driver again.",
+            "type" to "booking_update",
+            "relatedBookingId" to booking.bookingId,
+            "isRead" to false,
+            "createdAt" to now
+        )
+
+        FirebaseRefs.db.collection(FirebaseRefs.BOOKINGS)
+            .document(booking.bookingId)
+            .get()
+            .addOnSuccessListener { document ->
+                val latestStatus = document.getString("status").orEmpty()
+                val latestAssignedDriverId = document.getString("assignedDriverId").orEmpty()
+
+                if (latestStatus != Constants.STATUS_ACCEPTED || latestAssignedDriverId != currentUser.uid) {
+                    onFailure("This job can no longer be rejected")
+                    return@addOnSuccessListener
+                }
+
+                FirebaseRefs.db.collection(FirebaseRefs.BOOKINGS)
+                    .document(booking.bookingId)
+                    .update(bookingUpdates)
+                    .addOnSuccessListener {
+                        FirebaseRefs.db.collection(FirebaseRefs.BOOKING_STATUS_LOGS)
+                            .add(statusLog)
+                            .addOnSuccessListener {
+                                FirebaseRefs.db.collection(FirebaseRefs.PENALTIES)
+                                    .document(penaltyId)
+                                    .set(penalty)
+                                    .addOnSuccessListener {
+                                        FirebaseRefs.db.collection(FirebaseRefs.NOTIFICATIONS)
+                                            .add(notification)
+                                            .addOnSuccessListener { onSuccess() }
+                                            .addOnFailureListener { onSuccess() }
+                                    }
+                                    .addOnFailureListener { e ->
+                                        onFailure(e.message ?: "Job rejected but penalty failed")
+                                    }
+                            }
+                            .addOnFailureListener { e ->
+                                onFailure(e.message ?: "Job rejected but log failed")
+                            }
+                    }
+                    .addOnFailureListener { e ->
+                        onFailure(e.message ?: "Failed to reject job")
+                    }
+            }
+            .addOnFailureListener { e ->
+                onFailure(e.message ?: "Failed to check job status")
             }
     }
 }

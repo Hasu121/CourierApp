@@ -58,8 +58,16 @@ class CustomerHomeFragment : Fragment() {
     private fun loadRecentBookings() {
         customerRepository.getRecentBookings(
             onSuccess = { bookings ->
-                binding.tvBookingSummary.text = "Total recent bookings: ${bookings.size}"
+                binding.tvBookingSummary.text = "You have ${bookings.size} recent bookings"
                 recentBookingsAdapter.updateData(bookings)
+
+                if (bookings.isEmpty()) {
+                    binding.tvEmptyRecentBookings.visibility = View.VISIBLE
+                    binding.rvRecentBookings.visibility = View.GONE
+                } else {
+                    binding.tvEmptyRecentBookings.visibility = View.GONE
+                    binding.rvRecentBookings.visibility = View.VISIBLE
+                }
             },
             onFailure = { message ->
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()

@@ -7,9 +7,14 @@
         android:title="Home" />
 
     <item
-        android:id="@+id/menu_driver_notifications"
-        android:icon="@android:drawable/ic_dialog_info"
-        android:title="Notifications" />
+        android:id="@+id/menu_driver_jobs"
+        android:icon="@android:drawable/ic_menu_agenda"
+        android:title="Jobs" />
+
+    <item
+        android:id="@+id/menu_driver_my_deliveries"
+        android:icon="@android:drawable/ic_menu_directions"
+        android:title="My Jobs" />
 
     <item
         android:id="@+id/menu_driver_profile"

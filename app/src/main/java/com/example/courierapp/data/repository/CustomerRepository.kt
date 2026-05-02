@@ -121,4 +121,32 @@ class CustomerRepository {
             }
     }
 
+    fun getDriverLocation(
+        driverId: String,
+        onSuccess: (Double, Double) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        if (driverId.isEmpty()) {
+            onFailure("Driver not assigned")
+            return
+        }
+
+        FirebaseRefs.db.collection(FirebaseRefs.DRIVER_LOCATIONS)
+            .document(driverId)
+            .get()
+            .addOnSuccessListener { document ->
+                val lat = document.getDouble("lat") ?: 0.0
+                val lng = document.getDouble("lng") ?: 0.0
+
+                if (lat == 0.0 && lng == 0.0) {
+                    onFailure("Driver location not available")
+                } else {
+                    onSuccess(lat, lng)
+                }
+            }
+            .addOnFailureListener { e ->
+                onFailure(e.message ?: "Failed to load driver location")
+            }
+    }
+
 }

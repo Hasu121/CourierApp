@@ -23,6 +23,26 @@
             android:textSize="24sp"
             android:textStyle="bold" />
 
+        <org.maplibre.android.maps.MapView
+            android:id="@+id/mapViewTracking"
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:id="@+id/tvMapInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Map preview: pickup, drop, and driver location." />
+
+        <Button
+            android:id="@+id/btnExpandTrackingMap"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Expand Map" />
+
         <TextView
             android:id="@+id/tvBookingType"
             android:layout_width="wrap_content"
@@ -85,6 +105,20 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Created At:" />
+
+        <TextView
+            android:id="@+id/tvAssignedDriver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Assigned Driver: Not assigned" />
+
+        <Button
+            android:id="@+id/btnRefreshTracking"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="Refresh Tracking Map" />
 
         <TextView
             android:layout_width="wrap_content"

@@ -11,7 +11,7 @@ object FirebaseRefs {
     const val CUSTOMER_PROFILES = "customer_profiles"
     const val DRIVER_PROFILES = "driver_profiles"
     const val BOOKINGS = "bookings"
-    const val BOOKING_STATUS_LOGS = "booking_status"
+    const val BOOKING_STATUS_LOGS = "booking_status_logs"
     const val NOTIFICATIONS = "notifications"
     const val DRIVER_LOCATIONS = "driver_locations"
     const val PAYMENTS = "payments"

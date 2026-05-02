@@ -1,6 +1,7 @@
 package com.example.courierapp.data.model
 
 data class NotificationItem(
+    val notificationId: String = "",
     val userId: String = "",
     val title: String = "",
     val body: String = "",

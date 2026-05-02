@@ -2,4 +2,10 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="courier_green">#18A558</color>
+    <color name="courier_dark">#222222</color>
+    <color name="courier_light_bg">#F4F4F4</color>
+    <color name="courier_card">#EEEEEE</color>
+    <color name="courier_warning">#FF9800</color>
+    <color name="courier_blue">#2196F3</color>
 </resources>

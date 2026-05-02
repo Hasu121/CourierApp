@@ -13,6 +13,7 @@ import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
+import com.example.courierapp.utils.InsetHelper
 
 class LocationPickerDialogFragment(
     private val titleText: String,
@@ -32,6 +33,18 @@ class LocationPickerDialogFragment(
 
         _binding = DialogLocationPickerBinding.inflate(LayoutInflater.from(requireContext()))
         dialog.setContentView(binding.root)
+
+        InsetHelper.applySystemBarPadding(
+            view = binding.pickerTopControls,
+            applyTop = true,
+            applyBottom = false
+        )
+
+        InsetHelper.applySystemBarPadding(
+            view = binding.btnConfirmLocation,
+            applyTop = false,
+            applyBottom = true
+        )
 
         dialog.window?.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT,

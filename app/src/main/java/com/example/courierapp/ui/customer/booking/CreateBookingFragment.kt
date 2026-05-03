@@ -4,22 +4,27 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import com.example.courierapp.R
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.courierapp.BuildConfig
 import com.example.courierapp.data.repository.BookingRepository
 import com.example.courierapp.databinding.FragmentCreateBookingBinding
 import com.example.courierapp.ui.common.LocationPickerDialogFragment
+import com.example.courierapp.utils.Constants
+import com.example.courierapp.utils.FareConfig
 import com.example.courierapp.utils.LocationHelper
-import com.example.courierapp.utils.FareCalculator
-import org.maplibre.android.MapLibre
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.Style
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 class CreateBookingFragment : Fragment() {
 
@@ -36,6 +41,30 @@ class CreateBookingFragment : Fragment() {
 
     private var pickupMarker: Marker? = null
     private var dropMarker: Marker? = null
+
+    private val bookingTypeOptions = listOf(
+        Constants.BOOKING_WITHIN_CITY,
+        Constants.BOOKING_INTERCITY
+    )
+
+    private val vehicleOptions = listOf(
+        Constants.VEHICLE_BIKE,
+        Constants.VEHICLE_CAR,
+        Constants.VEHICLE_TRUCK
+    )
+
+    private val packageWeightOptions = listOf(
+        Constants.WEIGHT_LIGHT,
+        Constants.WEIGHT_MEDIUM,
+        Constants.WEIGHT_HEAVY
+    )
+
+    private val preferredTimeOptions = listOf(
+        "Now",
+        "Today Morning",
+        "Today Evening",
+        "Tomorrow"
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,6 +84,7 @@ class CreateBookingFragment : Fragment() {
 
         setupMap()
         setupSpinners()
+        setupFareRefreshListeners()
         updateCoordinateLabels()
         updateFareEstimate()
 
@@ -70,8 +100,8 @@ class CreateBookingFragment : Fragment() {
 
             binding.mapViewBooking.getMapAsync { map ->
                 map.animateCamera(
-                    org.maplibre.android.camera.CameraUpdateFactory.newLatLngZoom(
-                        org.maplibre.android.geometry.LatLng(pickupLat, pickupLng),
+                    CameraUpdateFactory.newLatLngZoom(
+                        LatLng(pickupLat, pickupLng),
                         15.0
                     )
                 )
@@ -86,8 +116,8 @@ class CreateBookingFragment : Fragment() {
 
             binding.mapViewBooking.getMapAsync { map ->
                 map.animateCamera(
-                    org.maplibre.android.camera.CameraUpdateFactory.newLatLngZoom(
-                        org.maplibre.android.geometry.LatLng(dropLat, dropLng),
+                    CameraUpdateFactory.newLatLngZoom(
+                        LatLng(dropLat, dropLng),
                         15.0
                     )
                 )
@@ -97,6 +127,7 @@ class CreateBookingFragment : Fragment() {
         binding.btnCreateBooking.setOnClickListener {
             createBooking()
         }
+
         binding.btnPickPickupOnMap.setOnClickListener {
             LocationPickerDialogFragment(
                 titleText = "Pick Pickup Location",
@@ -125,6 +156,16 @@ class CreateBookingFragment : Fragment() {
                 updateFareEstimate()
                 refreshPreviewMap()
             }.show(parentFragmentManager, "drop_picker")
+        }
+    }
+
+    private fun makeSpinnerAdapter(items: List<String>): ArrayAdapter<String> {
+        return ArrayAdapter(
+            requireContext(),
+            R.layout.item_spinner_selected,
+            items
+        ).also { adapter ->
+            adapter.setDropDownViewResource(R.layout.item_spinner_dropdown)
         }
     }
 
@@ -169,27 +210,29 @@ class CreateBookingFragment : Fragment() {
     }
 
     private fun setupSpinners() {
-        val bookingTypes = listOf("within_city", "intercity")
-        val packageWeights = listOf("light", "medium", "heavy")
-        val preferredTimes = listOf("now", "today_morning", "today_evening", "tomorrow")
+        binding.spinnerBookingType.adapter = makeSpinnerAdapter(bookingTypeOptions)
+        binding.spinnerVehicleType.adapter = makeSpinnerAdapter(vehicleOptions)
+        binding.spinnerPackageWeight.adapter = makeSpinnerAdapter(packageWeightOptions)
+        binding.spinnerPreferredTime.adapter = makeSpinnerAdapter(preferredTimeOptions)
+    }
 
-        binding.spinnerBookingType.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_dropdown_item,
-            bookingTypes
-        )
+    private fun setupFareRefreshListeners() {
+        val listener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                updateFareEstimate()
+            }
 
-        binding.spinnerPackageWeight.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_dropdown_item,
-            packageWeights
-        )
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
 
-        binding.spinnerPreferredTime.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_dropdown_item,
-            preferredTimes
-        )
+        binding.spinnerBookingType.onItemSelectedListener = listener
+        binding.spinnerVehicleType.onItemSelectedListener = listener
+        binding.spinnerPackageWeight.onItemSelectedListener = listener
     }
 
     private fun useCurrentLocation() {
@@ -235,45 +278,88 @@ class CreateBookingFragment : Fragment() {
         )
     }
 
-    private fun calculateSimpleFare(): Int {
-        val bookingType = binding.spinnerBookingType.selectedItem.toString()
-        val packageWeight = binding.spinnerPackageWeight.selectedItem.toString()
-
-        var fare = if (bookingType == "intercity") 250 else 80
-
-        fare += when (packageWeight) {
-            "medium" -> 40
-            "heavy" -> 80
-            else -> 0
-        }
-
-        if ((pickupLat != 0.0 || pickupLng != 0.0) && (dropLat != 0.0 || dropLng != 0.0)) {
-            fare += 50
-        }
-
-        return fare
-    }
-
     private fun updateFareEstimate() {
-        val packageWeight = binding.spinnerPackageWeight.selectedItem?.toString() ?: "light"
-        val bookingType = binding.spinnerBookingType.selectedItem?.toString() ?: "within_city"
+        val bookingType = binding.spinnerBookingType.selectedItem?.toString()
+            ?: Constants.BOOKING_WITHIN_CITY
+
+        val vehicleType = binding.spinnerVehicleType.selectedItem?.toString()
+            ?: Constants.VEHICLE_BIKE
+
+        val packageWeight = binding.spinnerPackageWeight.selectedItem?.toString()
+            ?: Constants.WEIGHT_LIGHT
 
         if ((pickupLat == 0.0 && pickupLng == 0.0) || (dropLat == 0.0 && dropLng == 0.0)) {
             binding.tvEstimatedFare.text = "Estimated Fare: ৳0"
             return
         }
 
-        val (distanceKm, estimatedFare) = FareCalculator.calculateEstimatedFare(
-            bookingType = bookingType,
-            packageWeight = packageWeight,
+        val distanceKm = calculateDistanceKm(
             pickupLat = pickupLat,
             pickupLng = pickupLng,
             dropLat = dropLat,
             dropLng = dropLng
         )
 
+        val estimatedFare = calculateFare(
+            bookingType = bookingType,
+            vehicleType = vehicleType,
+            packageWeight = packageWeight,
+            distanceKm = distanceKm
+        )
+
         binding.tvEstimatedFare.text =
             "Estimated Fare: ৳${estimatedFare.toInt()} | Distance: ${"%.2f".format(distanceKm)} km"
+    }
+
+    private fun calculateFare(
+        bookingType: String,
+        vehicleType: String,
+        packageWeight: String,
+        distanceKm: Double
+    ): Double {
+        val baseFare = when (bookingType) {
+            Constants.BOOKING_WITHIN_CITY -> FareConfig.WITHIN_CITY_BASE_FARE
+            Constants.BOOKING_INTERCITY -> FareConfig.INTERCITY_BASE_FARE
+            else -> FareConfig.WITHIN_CITY_BASE_FARE
+        }
+
+        val perKmRate = when (vehicleType) {
+            Constants.VEHICLE_BIKE -> FareConfig.PER_KM_BIKE
+            Constants.VEHICLE_CAR -> FareConfig.PER_KM_CAR
+            Constants.VEHICLE_TRUCK -> FareConfig.PER_KM_TRUCK
+            else -> FareConfig.PER_KM_BIKE
+        }
+
+        val weightCharge = when (packageWeight) {
+            Constants.WEIGHT_LIGHT -> FareConfig.WEIGHT_LIGHT
+            Constants.WEIGHT_MEDIUM -> FareConfig.WEIGHT_MEDIUM
+            Constants.WEIGHT_HEAVY -> FareConfig.WEIGHT_HEAVY
+            else -> FareConfig.WEIGHT_LIGHT
+        }
+
+        return baseFare + (distanceKm * perKmRate) + weightCharge
+    }
+
+    private fun calculateDistanceKm(
+        pickupLat: Double,
+        pickupLng: Double,
+        dropLat: Double,
+        dropLng: Double
+    ): Double {
+        val earthRadiusKm = 6371.0
+
+        val dLat = Math.toRadians(dropLat - pickupLat)
+        val dLng = Math.toRadians(dropLng - pickupLng)
+
+        val a = sin(dLat / 2) * sin(dLat / 2) +
+                cos(Math.toRadians(pickupLat)) *
+                cos(Math.toRadians(dropLat)) *
+                sin(dLng / 2) *
+                sin(dLng / 2)
+
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        return earthRadiusKm * c
     }
 
     private fun updateCoordinateLabels() {
@@ -297,8 +383,8 @@ class CreateBookingFragment : Fragment() {
             if (pickupLat != 0.0 || pickupLng != 0.0) {
                 pickupMarker?.let { map.removeMarker(it) }
                 pickupMarker = map.addMarker(
-                    org.maplibre.android.annotations.MarkerOptions()
-                        .position(org.maplibre.android.geometry.LatLng(pickupLat, pickupLng))
+                    MarkerOptions()
+                        .position(LatLng(pickupLat, pickupLng))
                         .title("Pickup")
                 )
             }
@@ -306,8 +392,8 @@ class CreateBookingFragment : Fragment() {
             if (dropLat != 0.0 || dropLng != 0.0) {
                 dropMarker?.let { map.removeMarker(it) }
                 dropMarker = map.addMarker(
-                    org.maplibre.android.annotations.MarkerOptions()
-                        .position(org.maplibre.android.geometry.LatLng(dropLat, dropLng))
+                    MarkerOptions()
+                        .position(LatLng(dropLat, dropLng))
                         .title("Drop")
                 )
             }
@@ -315,16 +401,17 @@ class CreateBookingFragment : Fragment() {
             when {
                 dropLat != 0.0 || dropLng != 0.0 -> {
                     map.animateCamera(
-                        org.maplibre.android.camera.CameraUpdateFactory.newLatLngZoom(
-                            org.maplibre.android.geometry.LatLng(dropLat, dropLng),
+                        CameraUpdateFactory.newLatLngZoom(
+                            LatLng(dropLat, dropLng),
                             14.0
                         )
                     )
                 }
+
                 pickupLat != 0.0 || pickupLng != 0.0 -> {
                     map.animateCamera(
-                        org.maplibre.android.camera.CameraUpdateFactory.newLatLngZoom(
-                            org.maplibre.android.geometry.LatLng(pickupLat, pickupLng),
+                        CameraUpdateFactory.newLatLngZoom(
+                            LatLng(pickupLat, pickupLng),
                             14.0
                         )
                     )
@@ -335,6 +422,7 @@ class CreateBookingFragment : Fragment() {
 
     private fun createBooking() {
         val bookingType = binding.spinnerBookingType.selectedItem.toString()
+        val vehicleType = binding.spinnerVehicleType.selectedItem.toString()
         val pickupAddress = binding.etPickupAddress.text.toString().trim()
         val dropAddress = binding.etDropAddress.text.toString().trim()
         val packageType = binding.etPackageType.text.toString().trim()
@@ -344,7 +432,8 @@ class CreateBookingFragment : Fragment() {
         val receiverPhone = binding.etReceiverPhone.text.toString().trim()
         val preferredTime = binding.spinnerPreferredTime.selectedItem.toString()
 
-        if (pickupAddress.isEmpty() ||
+        if (
+            pickupAddress.isEmpty() ||
             dropAddress.isEmpty() ||
             packageType.isEmpty() ||
             receiverName.isEmpty() ||
@@ -364,17 +453,23 @@ class CreateBookingFragment : Fragment() {
             return
         }
 
-        val (distanceKm, estimatedFare) = FareCalculator.calculateEstimatedFare(
-            bookingType = bookingType,
-            packageWeight = packageWeight,
+        val distanceKm = calculateDistanceKm(
             pickupLat = pickupLat,
             pickupLng = pickupLng,
             dropLat = dropLat,
             dropLng = dropLng
         )
 
+        val estimatedFare = calculateFare(
+            bookingType = bookingType,
+            vehicleType = vehicleType,
+            packageWeight = packageWeight,
+            distanceKm = distanceKm
+        )
+
         bookingRepository.createBooking(
             bookingType = bookingType,
+            vehicleType = vehicleType,
             pickupAddress = pickupAddress,
             pickupLat = pickupLat,
             pickupLng = pickupLng,
@@ -408,6 +503,7 @@ class CreateBookingFragment : Fragment() {
         binding.etReceiverPhone.text?.clear()
 
         binding.spinnerBookingType.setSelection(0)
+        binding.spinnerVehicleType.setSelection(0)
         binding.spinnerPackageWeight.setSelection(0)
         binding.spinnerPreferredTime.setSelection(0)
 

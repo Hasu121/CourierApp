@@ -130,7 +130,7 @@ class AuthRepository {
         phone: String,
         address: String,
         password: String,
-        vehicleType: String,
+        vehicleTypes: List<String>,
         vehicleNumber: String,
         licenseNumber: String,
         nidNumber: String,
@@ -163,7 +163,7 @@ class AuthRepository {
 
                 val driverProfile = DriverProfile(
                     uid = uid,
-                    vehicleType = vehicleType,
+                    vehicleTypes = vehicleTypes,
                     vehicleNumber = vehicleNumber,
                     licenseNumber = licenseNumber,
                     nidNumber = nidNumber,

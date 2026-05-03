@@ -52,30 +52,70 @@ class DriverHomeFragment : Fragment() {
             onSuccess = { profile ->
                 val safeBinding = _binding ?: return@getCurrentDriverProfile
 
-                safeBinding.tvVehicleType.text = "Vehicle Type: ${profile.vehicleType}"
+                val vehiclesText = if (profile.vehicleTypes.isEmpty()) {
+                    "Not set"
+                } else {
+                    profile.vehicleTypes.joinToString(", ")
+                }
+
+                val serviceModeText = if (profile.serviceMode.isEmpty()) {
+                    "Not set"
+                } else {
+                    profile.serviceMode.joinToString(", ")
+                }
+
+                safeBinding.tvVehicleType.text = "Vehicle Types: $vehiclesText"
                 safeBinding.tvVehicleNumber.text = "Vehicle Number: ${profile.vehicleNumber}"
                 safeBinding.tvLicenseNumber.text = "License Number: ${profile.licenseNumber}"
                 safeBinding.tvVerificationStatus.text = "Verification Status: ${profile.verificationStatus}"
-                safeBinding.tvServiceMode.text = "Service Mode: ${profile.serviceMode.joinToString()}"
+                safeBinding.tvServiceMode.text = "Service Mode: $serviceModeText"
+
                 safeBinding.tvAvailability.text =
                     "Availability: ${if (profile.isAvailable) "Online" else "Offline"}"
 
                 safeBinding.switchAvailability.setOnCheckedChangeListener(null)
                 safeBinding.switchAvailability.isChecked = profile.isAvailable
+                safeBinding.switchAvailability.text =
+                    if (profile.isAvailable) "Go Offline" else "Go Online"
 
                 safeBinding.switchAvailability.setOnCheckedChangeListener { _, isChecked ->
                     driverRepository.updateAvailability(
                         isAvailable = isChecked,
                         onSuccess = {
                             val currentBinding = _binding ?: return@updateAvailability
+
                             currentBinding.tvAvailability.text =
                                 "Availability: ${if (isChecked) "Online" else "Offline"}"
+
+                            currentBinding.switchAvailability.text =
+                                if (isChecked) "Go Offline" else "Go Online"
 
                             if (isAdded) {
                                 Toast.makeText(requireContext(), "Availability updated", Toast.LENGTH_SHORT).show()
                             }
                         },
                         onFailure = { message ->
+                            val currentBinding = _binding ?: return@updateAvailability
+
+                            currentBinding.switchAvailability.setOnCheckedChangeListener(null)
+                            currentBinding.switchAvailability.isChecked = !isChecked
+                            currentBinding.switchAvailability.text =
+                                if (!isChecked) "Go Offline" else "Go Online"
+
+                            currentBinding.switchAvailability.setOnCheckedChangeListener { _, checked ->
+                                driverRepository.updateAvailability(
+                                    isAvailable = checked,
+                                    onSuccess = {
+                                        val b = _binding ?: return@updateAvailability
+                                        b.tvAvailability.text =
+                                            "Availability: ${if (checked) "Online" else "Offline"}"
+                                        b.switchAvailability.text =
+                                            if (checked) "Go Offline" else "Go Online"
+                                    },
+                                    onFailure = {}
+                                )
+                            }
+
                             if (isAdded) {
                                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                             }

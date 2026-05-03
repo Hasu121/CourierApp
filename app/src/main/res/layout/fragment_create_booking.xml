@@ -9,15 +9,15 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingStart="20dp"
-        android:paddingEnd="20dp"
         android:paddingTop="20dp"
+        android:paddingEnd="20dp"
         android:paddingBottom="90dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/courier_dark"
             android:text="Create Booking"
+            android:textColor="@color/courier_dark"
             android:textSize="24sp"
             android:textStyle="bold" />
 
@@ -25,9 +25,9 @@
             android:id="@+id/tvMapHint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/courier_dark"
             android:layout_marginTop="10dp"
-            android:text="Use current location for pickup, or open the picker to drag the map and confirm location." />
+            android:text="Use current location for pickup, or open the picker to drag the map and confirm location."
+            android:textColor="@color/courier_dark" />
 
         <org.maplibre.android.maps.MapView
             android:id="@+id/mapViewBooking"
@@ -39,28 +39,28 @@
             android:id="@+id/btnUseCurrentLocation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/courier_green"
-            android:textColor="@color/courier_white"
             android:layout_marginTop="12dp"
-            android:text="Use Current Location for Pickup" />
+            android:backgroundTint="@color/courier_green"
+            android:text="Use Current Location for Pickup"
+            android:textColor="@color/courier_white" />
 
         <Button
             android:id="@+id/btnPickPickupOnMap"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/courier_green"
-            android:textColor="@color/courier_white"
             android:layout_marginTop="10dp"
-            android:text="Pick Pickup on Map" />
+            android:backgroundTint="@color/courier_green"
+            android:text="Pick Pickup on Map"
+            android:textColor="@color/courier_white" />
 
         <Button
             android:id="@+id/btnPickDropOnMap"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/courier_green"
-            android:textColor="@color/courier_white"
             android:layout_marginTop="10dp"
-            android:text="Pick Drop on Map" />
+            android:backgroundTint="@color/courier_green"
+            android:text="Pick Drop on Map"
+            android:textColor="@color/courier_white" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -72,127 +72,166 @@
                 android:id="@+id/btnCenterPickup"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/courier_green"
-                android:textColor="@color/courier_white"
                 android:layout_weight="1"
-                android:text="Center Pickup" />
+                android:backgroundTint="@color/courier_green"
+                android:text="Center Pickup"
+                android:textColor="@color/courier_white" />
 
             <Button
                 android:id="@+id/btnCenterDrop"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/courier_green"
-                android:textColor="@color/courier_white"
-                android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="Center Drop" />
+                android:layout_weight="1"
+                android:backgroundTint="@color/courier_green"
+                android:text="Center Drop"
+                android:textColor="@color/courier_white" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/tvPickupCoords"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/courier_dark"
             android:layout_marginTop="10dp"
-            android:text="Pickup Coords: Not set" />
+            android:text="Pickup Coords: Not set"
+            android:textColor="@color/courier_dark" />
 
         <TextView
             android:id="@+id/tvDropCoords"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/courier_dark"
             android:layout_marginTop="6dp"
-            android:text="Drop Coords: Not set" />
+            android:text="Drop Coords: Not set"
+            android:textColor="@color/courier_dark" />
 
         <TextView
             android:id="@+id/tvEstimatedFare"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/courier_dark"
             android:layout_marginTop="14dp"
             android:text="Estimated Fare: ৳0"
+            android:textColor="@color/courier_dark"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Booking Type"
+            android:textColor="@color/courier_dark"
             android:textStyle="bold" />
 
         <Spinner
             android:id="@+id/spinnerBookingType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="6dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Vehicle Type"
+            android:textColor="@color/courier_dark"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/spinnerVehicleType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" />
 
         <EditText
             android:id="@+id/etPickupAddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/courier_dark"
-            android:textColorHint="@color/courier_gray_text"
             android:layout_marginTop="12dp"
-            android:hint="Pickup Address" />
+            android:hint="Pickup Address"
+            android:textColor="@color/courier_dark"
+            android:textColorHint="@color/courier_gray_text" />
 
         <EditText
             android:id="@+id/etDropAddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/courier_dark"
-            android:textColorHint="@color/courier_gray_text"
             android:layout_marginTop="12dp"
-            android:hint="Drop Address" />
+            android:hint="Drop Address"
+            android:textColor="@color/courier_dark"
+            android:textColorHint="@color/courier_gray_text" />
 
         <EditText
             android:id="@+id/etPackageType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/courier_dark"
-            android:textColorHint="@color/courier_gray_text"
             android:layout_marginTop="12dp"
-            android:hint="Package Type" />
+            android:hint="Package Type"
+            android:textColor="@color/courier_dark"
+            android:textColorHint="@color/courier_gray_text" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Package Weight"
+            android:textColor="@color/courier_dark"
+            android:textStyle="bold" />
 
         <Spinner
             android:id="@+id/spinnerPackageWeight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp" />
+            android:layout_marginTop="6dp" />
 
         <EditText
             android:id="@+id/etPackageNote"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/courier_dark"
-            android:textColorHint="@color/courier_gray_text"
             android:layout_marginTop="12dp"
-            android:hint="Package Note" />
+            android:hint="Package Note"
+            android:textColor="@color/courier_dark"
+            android:textColorHint="@color/courier_gray_text" />
 
         <EditText
             android:id="@+id/etReceiverName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/courier_dark"
-            android:textColorHint="@color/courier_gray_text"
             android:layout_marginTop="12dp"
-            android:hint="Receiver Name" />
+            android:hint="Receiver Name"
+            android:textColor="@color/courier_dark"
+            android:textColorHint="@color/courier_gray_text" />
 
         <EditText
             android:id="@+id/etReceiverPhone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/courier_dark"
-            android:textColorHint="@color/courier_gray_text"
             android:layout_marginTop="12dp"
             android:hint="Receiver Phone"
-            android:inputType="phone" />
+            android:inputType="phone"
+            android:textColor="@color/courier_dark"
+            android:textColorHint="@color/courier_gray_text" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Preferred Time"
+            android:textColor="@color/courier_dark"
+            android:textStyle="bold" />
 
         <Spinner
             android:id="@+id/spinnerPreferredTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp" />
+            android:layout_marginTop="6dp" />
 
         <Button
             android:id="@+id/btnCreateBooking"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/courier_green"
-            android:textColor="@color/courier_white"
             android:layout_marginTop="20dp"
-            android:text="Create Booking" />
+            android:backgroundTint="@color/courier_green"
+            android:text="Create Booking"
+            android:textColor="@color/courier_white" />
+
     </LinearLayout>
 </ScrollView>

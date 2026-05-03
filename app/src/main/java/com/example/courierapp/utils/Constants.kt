@@ -20,8 +20,25 @@ object Constants {
     const val EARNING_TYPE_DELIVERY = "delivery_earning"
 
     const val CUSTOMER_CANCEL_PENALTY = 50.0
-
     const val DRIVER_REJECT_PENALTY = 50.0
+
+    // Booking / service labels
+    const val BOOKING_WITHIN_CITY = "Within City"
+    const val BOOKING_INTERCITY = "Intercity"
+
+    const val SERVICE_WITHIN_CITY = "Within City"
+    const val SERVICE_INTERCITY = "Intercity"
+    const val SERVICE_BOTH = "Both"
+
+    // Vehicle labels
+    const val VEHICLE_BIKE = "Bike"
+    const val VEHICLE_CAR = "Car"
+    const val VEHICLE_TRUCK = "Truck"
+
+    // Package weight labels
+    const val WEIGHT_LIGHT = "Light"
+    const val WEIGHT_MEDIUM = "Medium"
+    const val WEIGHT_HEAVY = "Heavy"
 }
 
 object FareConfig {

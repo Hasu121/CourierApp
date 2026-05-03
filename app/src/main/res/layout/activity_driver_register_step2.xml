@@ -20,14 +20,42 @@
             android:textSize="28sp"
             android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/etVehicleType"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:hint="Vehicle Type (bike/car/truck)"
+            android:text="Vehicle Type"
             android:textColor="@color/courier_dark"
-            android:textColorHint="@color/courier_gray_text" />
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Vehicle Types"
+            android:textColor="@color/courier_dark"
+            android:textStyle="bold" />
+
+        <CheckBox
+            android:id="@+id/cbBike"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bike"
+            android:textColor="@color/courier_dark" />
+
+        <CheckBox
+            android:id="@+id/cbCar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Car"
+            android:textColor="@color/courier_dark" />
+
+        <CheckBox
+            android:id="@+id/cbTruck"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Truck"
+            android:textColor="@color/courier_dark" />
 
         <EditText
             android:id="@+id/etVehicleNumber"
@@ -56,14 +84,19 @@
             android:textColor="@color/courier_dark"
             android:textColorHint="@color/courier_gray_text" />
 
-        <EditText
-            android:id="@+id/etServiceMode"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Service Mode"
+            android:textColor="@color/courier_dark"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/spServiceMode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Service Mode (within_city/intercity/both)"
-            android:textColor="@color/courier_dark"
-            android:textColorHint="@color/courier_gray_text" />
+            android:layout_marginTop="8dp" />
 
         <Button
             android:id="@+id/btnRegisterDriver"

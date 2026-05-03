@@ -58,7 +58,7 @@ class ProfileRepository {
                 onSuccess()
             }
             .addOnFailureListener { e ->
-                onFailure(e.message ?: "Failed to update profile")
+                onFailure(e.message ?: "Failed to update customer profile")
             }
     }
 
@@ -66,8 +66,9 @@ class ProfileRepository {
         fullName: String,
         phone: String,
         address: String,
-        vehicleType: String,
+        vehicleTypes: List<String>,
         vehicleNumber: String,
+        serviceMode: List<String>,
         onSuccess: () -> Unit,
         onFailure: (String) -> Unit
     ) {
@@ -87,8 +88,9 @@ class ProfileRepository {
         )
 
         val driverUpdates = mapOf(
-            "vehicleType" to vehicleType,
+            "vehicleTypes" to vehicleTypes,
             "vehicleNumber" to vehicleNumber,
+            "serviceMode" to serviceMode,
             "updatedAt" to now
         )
 

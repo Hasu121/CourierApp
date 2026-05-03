@@ -9,6 +9,7 @@ class BookingRepository {
 
     fun createBooking(
         bookingType: String,
+        vehicleType: String,
         pickupAddress: String,
         pickupLat: Double,
         pickupLng: Double,
@@ -52,6 +53,7 @@ class BookingRepository {
                     pickupAddress = pickupAddress,
                     pickupLat = pickupLat,
                     pickupLng = pickupLng,
+                    vehicleType = vehicleType,
                     dropAddress = dropAddress,
                     dropLat = dropLat,
                     dropLng = dropLng,
@@ -77,6 +79,7 @@ class BookingRepository {
     private fun saveBookingAfterPenaltyCheck(
         customerId: String,
         bookingType: String,
+        vehicleType: String,
         pickupAddress: String,
         pickupLat: Double,
         pickupLng: Double,
@@ -104,6 +107,7 @@ class BookingRepository {
             customerId = customerId,
             assignedDriverId = "",
             bookingType = bookingType,
+            vehicleType = vehicleType,
             pickupAddress = pickupAddress,
             pickupLat = pickupLat,
             pickupLng = pickupLng,

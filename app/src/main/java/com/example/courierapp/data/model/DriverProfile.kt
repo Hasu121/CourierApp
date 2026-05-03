@@ -2,7 +2,7 @@ package com.example.courierapp.data.model
 
 data class DriverProfile(
     val uid: String = "",
-    val vehicleType: String = "",
+    val vehicleTypes: List<String> = emptyList(),
     val vehicleNumber: String = "",
     val licenseNumber: String = "",
     val nidNumber: String = "",

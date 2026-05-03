@@ -190,8 +190,21 @@ class DriverRepository {
                     return@addOnSuccessListener
                 }
 
-                val serviceMode = profileDoc.get("serviceMode") as? List<*> ?: emptyList<String>()
-                val driverModes = serviceMode.mapNotNull { it?.toString() }
+                val vehicleTypesRaw = profileDoc.get("vehicleTypes") as? List<*> ?: emptyList<String>()
+                val driverVehicleTypes = vehicleTypesRaw.mapNotNull { it?.toString() }
+
+                val serviceModeRaw = profileDoc.get("serviceMode") as? List<*> ?: emptyList<String>()
+                val driverModes = serviceModeRaw.mapNotNull { it?.toString() }
+
+                if (driverVehicleTypes.isEmpty()) {
+                    onFailure("Driver vehicle type is not set")
+                    return@addOnSuccessListener
+                }
+
+                if (driverModes.isEmpty()) {
+                    onFailure("Driver service mode is not set")
+                    return@addOnSuccessListener
+                }
 
                 FirebaseRefs.db.collection(FirebaseRefs.BOOKINGS)
                     .whereEqualTo("status", Constants.STATUS_PENDING)
@@ -203,7 +216,8 @@ class DriverRepository {
 
                         val filteredJobs = bookings.filter { booking ->
                             booking.assignedDriverId.isEmpty() &&
-                                    driverModes.contains(booking.bookingType)
+                                    driverModes.contains(booking.bookingType) &&
+                                    driverVehicleTypes.contains(booking.vehicleType)
                         }
 
                         onSuccess(filteredJobs)
@@ -701,6 +715,7 @@ class DriverRepository {
                 customerId = doc.getString("customerId").orEmpty(),
                 assignedDriverId = doc.getString("assignedDriverId").orEmpty(),
                 bookingType = doc.getString("bookingType").orEmpty(),
+                vehicleType = doc.getString("vehicleType").orEmpty(),
 
                 pickupAddress = doc.getString("pickupAddress").orEmpty(),
                 pickupLat = doc.getDouble("pickupLat") ?: 0.0,

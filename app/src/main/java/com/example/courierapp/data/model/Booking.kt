@@ -5,6 +5,7 @@ data class Booking(
     val customerId: String = "",
     val assignedDriverId: String = "",
     val bookingType: String = "",
+    val vehicleType: String = "",
     val pickupAddress: String = "",
     val pickupLat: Double = 0.0,
     val pickupLng: Double = 0.0,
